@@ -12,13 +12,6 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const isValidImageUrl = (url) => {
-    if (!url || typeof url !== 'string' || url.trim() === '') return false;
-    const urlLower = url.toLowerCase();
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-    return imageExtensions.some(ext => urlLower.endsWith(ext));
-};
-
 cmd({
     pattern: "repo",
     alias: ["sc", "script", "repository", "deploy"],
@@ -31,9 +24,6 @@ async (conn, mek, m, { from, reply, userConfig }) => {
     try {
         const BOT_NAME = userConfig?.BOT_NAME || config.BOT_NAME || 'AHMAD-MD';
         const OWNER_NAME = userConfig?.OWNER_NAME || config.OWNER_NAME || 'AHMAD-TECH';
-        
-        // Yahan aapne apna naya Catbox URL set kar diya hai
-        const BOT_IMAGE = 'https://files.catbox.moe/2maqd9.jpg';
         
         const deployLink = 'https://ahmad-md.vercel.app';
 
@@ -64,21 +54,11 @@ async (conn, mek, m, { from, reply, userConfig }) => {
 *📢 Stay Connected for Updates!*
 *Powered By ${OWNER_NAME}*`.trim();
 
-        let imageToUse;
-        
-        if (isValidImageUrl(BOT_IMAGE)) {
-            try {
-                await axios.head(BOT_IMAGE, { timeout: 3000 });
-                imageToUse = BOT_IMAGE;
-            } catch (e) {
-                imageToUse = path.join(__dirname, '../lib/AHMADmd.jpg');
-            }
-        } else {
-            imageToUse = BOT_IMAGE;
-        }
+        // Direct Catbox Image URL (Same as Help command structure)
+        const imageToSend = { url: "https://files.catbox.moe/2maqd9.jpg" };
 
         await conn.sendMessage(from, {
-            image: { url: imageToUse },
+            image: imageToSend,
             caption: formattedInfo,
             contextInfo: { 
                 mentionedJid: [m.sender],
@@ -97,4 +77,3 @@ async (conn, mek, m, { from, reply, userConfig }) => {
         reply("❌ Error: Script fetch nahi ho saki.");
     }
 });
-                               
