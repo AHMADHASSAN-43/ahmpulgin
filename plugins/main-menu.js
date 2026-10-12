@@ -35,7 +35,7 @@ const formatCategory = (category, cmds) => {
 
 cmd({
     pattern: "menu",
-    alias: ["m", "help", "allmenu"],
+    alias: ["m", "help", "allmenu", "listcmd", "list", "commands"],
     category: "main",
     react: "👑",
     filename: __filename
