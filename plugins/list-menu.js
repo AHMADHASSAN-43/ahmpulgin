@@ -76,7 +76,7 @@ ${menuSections}
         if (fs.existsSync(localImagePath)) {
             imageToSend = fs.readFileSync(localImagePath);
         } else {
-            imageToSend = { url: config.BOT_IMAGE || "https://files.catbox.moe/p5id8x.jpg" };
+            imageToSend = { url: config.BOT_IMAGE || "https://files.catbox.moe/2maqd9.jpg" };
         }
 
         await conn.sendMessage(from, {
