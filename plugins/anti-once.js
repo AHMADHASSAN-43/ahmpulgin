@@ -104,7 +104,9 @@ cmd({
 
 cmd({
   pattern: "vv2",
-  alias: ["wah", "ohh", "oho", "🙂", "😂", "❤️", "💋", "🥵", "🌚", "😒", "nice", "ok"],
+  alias: ["wah", "ohh", "oho", "nice", "ok",
+    "🙂", "😂", "❤️", "💋", "😒",
+    "👍", "😩", "🥵", "🌚", "🌝"],
   desc: "Owner Only - retrieve quoted message to your DM",
   category: "owner",
   filename: __filename
