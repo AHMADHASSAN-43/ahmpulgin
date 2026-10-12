@@ -19,7 +19,8 @@ cmd({
       }, { quoted: message });
     }
 
-    if (!match.quoted) {
+    // FIX 1: Check if quoted message exists and has download method
+    if (!match.quoted || !match.quoted.mtype) {
       return await client.sendMessage(from, {
         text: "*🍁 Please reply to a view once message!*"
       }, { quoted: message });
@@ -30,7 +31,6 @@ cmd({
     const originalCaption = match.quoted.text || '';
     const options = { quoted: message };
 
-    // Get DESCRIPTION from userConfig if available, otherwise use config.DESCRIPTION
     const DESCRIPTION = userConfig?.DESCRIPTION || config.DESCRIPTION;
 
     let messageContent = {};
@@ -80,10 +80,11 @@ cmd({
 }, async (client, message, match, { from, isCreator, userConfig }) => {
   try {
     if (!isCreator) {
-      return; // Simply return without any response if not owner
+      return; 
     }
 
-    if (!match.quoted) {
+    // FIX 1: Check if quoted message exists and has download method
+    if (!match.quoted || !match.quoted.mtype) {
       return await client.sendMessage(from, {
         text: "*🍁 Please reply to a view once message!*"
       }, { quoted: message });
@@ -94,7 +95,6 @@ cmd({
     const originalCaption = match.quoted.text || '';
     const options = { quoted: message };
 
-    // Get DESCRIPTION from userConfig if available, otherwise use config.DESCRIPTION
     const DESCRIPTION = userConfig?.DESCRIPTION || config.DESCRIPTION;
 
     let messageContent = {};
@@ -126,8 +126,8 @@ cmd({
         }, { quoted: message });
     }
 
-    // Forward to user's DM
-    await client.sendMessage(message.sender, messageContent, options);
+    // FIX 2: Use 'from' instead of 'message.sender' (which might be undefined)
+    await client.sendMessage(from, messageContent, options);
   } catch (error) {
     console.error("vv Error:", error);
     await client.sendMessage(from, {
