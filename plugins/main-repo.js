@@ -31,7 +31,9 @@ async (conn, mek, m, { from, reply, userConfig }) => {
     try {
         const BOT_NAME = userConfig?.BOT_NAME || config.BOT_NAME || 'AHMAD-MD';
         const OWNER_NAME = userConfig?.OWNER_NAME || config.OWNER_NAME || 'AHMAD-TECH';
-        const BOT_IMAGE = userConfig?.BOT_IMAGE || userConfig?.BOT_MEDIA_URL || config.BOT_IMAGE || config.BOT_MEDIA_URL;
+        
+        // Yahan aapne apna naya Catbox URL set kar diya hai
+        const BOT_IMAGE = 'https://files.catbox.moe/2maqd9.jpg';
         
         const deployLink = 'https://ahmad-md.vercel.app';
 
@@ -63,17 +65,16 @@ async (conn, mek, m, { from, reply, userConfig }) => {
 *Powered By ${OWNER_NAME}*`.trim();
 
         let imageToUse;
-        const localImagePath = path.join(__dirname, '../lib/AHMADmd.jpg');
         
         if (isValidImageUrl(BOT_IMAGE)) {
             try {
                 await axios.head(BOT_IMAGE, { timeout: 3000 });
                 imageToUse = BOT_IMAGE;
             } catch (e) {
-                imageToUse = localImagePath;
+                imageToUse = path.join(__dirname, '../lib/AHMADmd.jpg');
             }
         } else {
-            imageToUse = localImagePath;
+            imageToUse = BOT_IMAGE;
         }
 
         await conn.sendMessage(from, {
@@ -96,3 +97,4 @@ async (conn, mek, m, { from, reply, userConfig }) => {
         reply("❌ Error: Script fetch nahi ho saki.");
     }
 });
+                               
