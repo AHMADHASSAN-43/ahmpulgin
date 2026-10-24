@@ -5,7 +5,7 @@ const { sendButtons } = require('gifted-btns');
 
 const IMGBB_API_KEY = process.env.IMGBB_API_KEY || '8db492efc937a635b90680a9a860dc85';
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
-const FOOTER = `> *© ᴜᴘʟᴏᴀᴅᴇᴅ ʙʏ ᴀᴅᴇᴇʟ-ᴍᴅ 🍸*`;
+const FOOTER = `> *© ᴜᴘʟᴏᴀᴅᴇᴅ ʙʏ 𝘼𝙃𝙈𝘼𝘿🫠❤️‍🩹*`;
 
 const MTYPE_MIME = {
   imageMessage: 'image/jpeg',
