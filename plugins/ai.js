@@ -1,4 +1,3 @@
-
 import { fileURLToPath } from 'url';
 import { cmd } from '../command.js';
 import axios from 'axios';
@@ -26,136 +25,726 @@ async function askAI(q, reply, usage) {
     }
 }
 
-// Helper
-function reg(pattern, desc, react) {
-    cmd({
-        pattern,
-        desc,
-        category: "ai",
-        react,
-        filename: __filename
-    }, async (conn, mek, m, { q, reply }) => {
-        await askAI(q, reply, `❌ *Usage:* .${pattern} Your question`);
-    });
-}
+cmd({
+    pattern: "copilot",
+    desc: "Chat with Microsoft Copilot AI",
+    category: "ai",
+    react: "✨",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .copilot Your question");
+});
 
-// ========== ORIGINAL 72 ==========
-reg("copilot", "Microsoft Copilot AI", "✨");
-reg("chatgptelite", "ChatGPT Elite AI", "🧠");
-reg("talkai", "Talk AI", "💬");
-reg("brain", "Brain AI", "🧠");
-reg("elite", "Elite AI Assistant", "👑");
-reg("mscopilot", "Microsoft Copilot", "💙");
-reg("elitegpt", "Elite ChatGPT", "🤖");
-reg("assistant", "AI Assistant", "🤵");
-reg("smart", "Smart AI", "🧠");
-reg("genius", "Genius AI", "🌟");
-reg("proai", "Pro AI", "⚡");
-reg("elitecopilot", "Elite Copilot", "🎯");
-reg("ultra", "Ultra AI", "🔥");
-reg("maxai", "Max AI", "💪");
-reg("nova", "Nova AI", "⭐");
-reg("zenith", "Zenith AI", "✨");
-reg("apex", "Apex AI", "🏆");
-reg("vertex", "Vertex AI", "🔷");
-reg("pulse", "Pulse AI", "💓");
-reg("quantum", "Quantum AI", "⚛️");
-reg("neo", "Neo AI", "💚");
-reg("omega", "Omega AI", "🔱");
-reg("gpt", "GPT-3.5 AI", "🤖");
-reg("gpt4", "GPT-4 AI", "🤖");
-reg("gpt4o", "GPT-4o AI", "🤖");
-reg("chatgpt", "ChatGPT AI", "🤖");
-reg("claude", "Claude AI", "🤖");
-reg("gemini", "Google Gemini AI", "🤖");
-reg("kimi", "Kimi AI", "🤖");
-reg("perplexity", "Perplexity AI", "🤖");
-reg("llama2", "Llama 2 AI", "🤖");
-reg("llama3", "Llama 3 AI", "🤖");
-reg("mistral", "Mistral AI", "🤖");
-reg("mixtral", "Mixtral AI", "🤖");
-reg("falcon", "Falcon AI", "🤖");
-reg("bloom", "BLOOM AI", "🤖");
-reg("orca", "Orca AI", "🤖");
-reg("vicuna", "Vicuna AI", "🤖");
-reg("alpaca", "Alpaca AI", "🤖");
-reg("phi2", "Phi-2 AI", "🤖");
-reg("wizard", "Wizard AI", "🤖");
-reg("codet5", "CodeT5 AI", "🤖");
-reg("starlin", "Starlin AI", "🤖");
-reg("deepseek", "DeepSeek AI", "🤖");
-reg("deepseekcoder", "DeepSeek Coder AI", "🤖");
-reg("yi", "Yi AI", "🤖");
-reg("yi34b", "Yi-34B AI", "🤖");
-reg("qwen", "Qwen AI", "🤖");
-reg("command", "Command AI", "🤖");
-reg("jurassic", "Jurassic AI", "🤖");
-reg("ai21", "AI21 Labs AI", "🤖");
-reg("solar", "Solar AI", "🤖");
-reg("lumin", "Lumin AI", "🤖");
-reg("grokbeta", "Grok Beta AI", "🤖");
-reg("bard", "Google Bard AI", "🤖");
-reg("redpajama", "RedPajama AI", "🤖");
-reg("dolly", "Dolly AI", "🤖");
-reg("codex", "Codex AI", "🤖");
-reg("hugging", "HuggingChat AI", "🤖");
-reg("openassist", "OpenAssistant AI", "🤖");
-reg("gptneo", "GPT-Neo AI", "🤖");
-reg("gptj", "GPT-J AI", "🤖");
-reg("bloomz", "BLOOMZ AI", "🤖");
-reg("flant5", "FLAN-T5 AI", "🤖");
-reg("codegen", "CodeGen AI", "🤖");
-reg("starcoder", "StarCoder AI", "🤖");
-reg("gpt3", "GPT-3 AI", "🤖");
-reg("chatgptplus", "ChatGPT Plus AI", "🤖");
-reg("gpt4turbo", "GPT-4 Turbo AI", "🤖");
-reg("claudeinstant", "Claude Instant AI", "🤖");
-reg("claude2", "Claude 2 AI", "🤖");
-reg("palm2", "PaLM 2 AI", "🤖");
+cmd({
+    pattern: "chatgptelite",
+    desc: "Chat with ChatGPT Elite AI",
+    category: "ai",
+    react: "🧠",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .chatgptelite Your question");
+});
 
-// ========== NEW 40 (Total = 112) ==========
-reg("replit", "Replit AI", "🟠");
-reg("replitai", "Replit AI Assistant", "🟠");
-reg("repl", "Repl AI", "🟠");
-reg("geminipro", "Gemini Pro AI", "💎");
-reg("geminiultra", "Gemini Ultra AI", "💎");
-reg("geminai", "Geminai AI", "💎");
-reg("deepseekv3", "DeepSeek V3 AI", "🐋");
-reg("deepseekchat", "DeepSeek Chat AI", "🐋");
-reg("deepseekr1", "DeepSeek R1 AI", "🐋");
-reg("ds", "DeepSeek AI", "🐋");
-reg("ma", "MA AI", "🤖");
-reg("ahmad", "AHMAD AI", "👨‍💻");
-reg("ahmed", "AHMED AI", "👨‍💻");
-reg("ahmadai", "AHMAD AI Assistant", "👨‍💻");
-reg("ahmadgpt", "AHMAD GPT", "👨‍💻");
-reg("grok", "Grok AI", "🚀");
-reg("grok2", "Grok 2 AI", "🚀");
-reg("grok3", "Grok 3 AI", "🚀");
-reg("xai", "xAI", "🚀");
-reg("metaai", "Meta AI", "🔵");
-reg("llama", "Llama AI", "🦙");
-reg("llama4", "Llama 4 AI", "🦙");
-reg("claude3", "Claude 3 AI", "🎭");
-reg("claude35", "Claude 3.5 AI", "🎭");
-reg("claudeopus", "Claude Opus AI", "🎭");
-reg("claudesonnet", "Claude Sonnet AI", "🎭");
-reg("claudehaiku", "Claude Haiku AI", "🎭");
-reg("o1", "OpenAI o1", "🧪");
-reg("o1mini", "OpenAI o1-mini", "🧪");
-reg("o3", "OpenAI o3", "🧪");
-reg("qwen2", "Qwen 2 AI", "🐉");
-reg("qwen25", "Qwen 2.5 AI", "🐉");
-reg("qwenmax", "Qwen Max AI", "🐉");
-reg("moonshot", "Moonshot AI", "🌙");
-reg("kimi2", "Kimi 2 AI", "🌙");
-reg("glm", "GLM AI", "🧬");
-reg("glm4", "GLM-4 AI", "🧬");
-reg("ernie", "ERNIE Bot AI", "🐻");
-reg("ernie4", "ERNIE 4 AI", "🐻");
-reg("doubao", "Doubao AI", "🫘");
+cmd({
+    pattern: "talkai",
+    desc: "Chat with Talk AI",
+    category: "ai",
+    react: "💬",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .talkai Your question");
+});
 
-// ========== SPECIAL BEHAVIOR ==========
+cmd({
+    pattern: "brain",
+    desc: "Chat with Brain AI",
+    category: "ai",
+    react: "🧠",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .brain Your question");
+});
+
+cmd({
+    pattern: "elite",
+    desc: "Chat with Elite AI Assistant",
+    category: "ai",
+    react: "👑",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .elite Your question");
+});
+
+cmd({
+    pattern: "mscopilot",
+    desc: "Chat with Microsoft Copilot",
+    category: "ai",
+    react: "💙",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .mscopilot Your question");
+});
+
+cmd({
+    pattern: "elitegpt",
+    desc: "Chat with Elite ChatGPT",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .elitegpt Your question");
+});
+
+cmd({
+    pattern: "assistant",
+    desc: "Chat with AI Assistant",
+    category: "ai",
+    react: "🤵",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .assistant Your question");
+});
+
+cmd({
+    pattern: "smart",
+    desc: "Chat with Smart AI",
+    category: "ai",
+    react: "🧠",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .smart Your question");
+});
+
+cmd({
+    pattern: "genius",
+    desc: "Chat with Genius AI",
+    category: "ai",
+    react: "🌟",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .genius Your question");
+});
+
+cmd({
+    pattern: "proai",
+    desc: "Chat with Pro AI",
+    category: "ai",
+    react: "⚡",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .proai Your question");
+});
+
+cmd({
+    pattern: "elitecopilot",
+    desc: "Chat with Elite Copilot",
+    category: "ai",
+    react: "🎯",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .elitecopilot Your question");
+});
+
+cmd({
+    pattern: "ultra",
+    desc: "Chat with Ultra AI",
+    category: "ai",
+    react: "🔥",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .ultra Your question");
+});
+
+cmd({
+    pattern: "maxai",
+    desc: "Chat with Max AI",
+    category: "ai",
+    react: "💪",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .maxai Your question");
+});
+
+cmd({
+    pattern: "nova",
+    desc: "Chat with Nova AI",
+    category: "ai",
+    react: "⭐",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .nova Your question");
+});
+
+cmd({
+    pattern: "zenith",
+    desc: "Chat with Zenith AI",
+    category: "ai",
+    react: "✨",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .zenith Your question");
+});
+
+cmd({
+    pattern: "apex",
+    desc: "Chat with Apex AI",
+    category: "ai",
+    react: "🏆",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .apex Your question");
+});
+
+cmd({
+    pattern: "vertex",
+    desc: "Chat with Vertex AI",
+    category: "ai",
+    react: "🔷",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .vertex Your question");
+});
+
+cmd({
+    pattern: "pulse",
+    desc: "Chat with Pulse AI",
+    category: "ai",
+    react: "💓",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .pulse Your question");
+});
+
+cmd({
+    pattern: "quantum",
+    desc: "Chat with Quantum AI",
+    category: "ai",
+    react: "⚛️",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .quantum Your question");
+});
+
+cmd({
+    pattern: "neo",
+    desc: "Chat with Neo AI",
+    category: "ai",
+    react: "💚",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .neo Your question");
+});
+
+cmd({
+    pattern: "omega",
+    desc: "Chat with Omega AI",
+    category: "ai",
+    react: "🔱",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .omega Your question");
+});
+
+cmd({
+    pattern: "gpt",
+    desc: "Chat with GPT-3.5 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .gpt Your question");
+});
+
+cmd({
+    pattern: "gpt4",
+    desc: "Chat with GPT-4 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .gpt4 Your question");
+});
+
+cmd({
+    pattern: "gpt4o",
+    desc: "Chat with GPT-4o AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .gpt4o Your question");
+});
+
+cmd({
+    pattern: "chatgpt",
+    desc: "Chat with ChatGPT AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .chatgpt Your question");
+});
+
+cmd({
+    pattern: "claude",
+    desc: "Chat with Claude AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .claude Your question");
+});
+
+cmd({
+    pattern: "gemini",
+    desc: "Chat with Google Gemini AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .gemini Your question");
+});
+
+cmd({
+    pattern: "kimi",
+    desc: "Chat with Kimi AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .kimi Your question");
+});
+
+cmd({
+    pattern: "perplexity",
+    desc: "Chat with Perplexity AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .perplexity Your question");
+});
+
+cmd({
+    pattern: "llama2",
+    desc: "Chat with Llama 2 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .llama2 Your question");
+});
+
+cmd({
+    pattern: "llama3",
+    desc: "Chat with Llama 3 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .llama3 Your question");
+});
+
+cmd({
+    pattern: "mistral",
+    desc: "Chat with Mistral AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .mistral Your question");
+});
+
+cmd({
+    pattern: "mixtral",
+    desc: "Chat with Mixtral AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .mixtral Your question");
+});
+
+cmd({
+    pattern: "falcon",
+    desc: "Chat with Falcon AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .falcon Your question");
+});
+
+cmd({
+    pattern: "bloom",
+    desc: "Chat with BLOOM AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .bloom Your question");
+});
+
+cmd({
+    pattern: "orca",
+    desc: "Chat with Orca AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .orca Your question");
+});
+
+cmd({
+    pattern: "vicuna",
+    desc: "Chat with Vicuna AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .vicuna Your question");
+});
+
+cmd({
+    pattern: "alpaca",
+    desc: "Chat with Alpaca AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .alpaca Your question");
+});
+
+cmd({
+    pattern: "phi2",
+    desc: "Chat with Phi-2 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .phi2 Your question");
+});
+
+cmd({
+    pattern: "wizard",
+    desc: "Chat with Wizard AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .wizard Your question");
+});
+
+cmd({
+    pattern: "codet5",
+    desc: "Chat with CodeT5 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .codet5 Your question");
+});
+
+cmd({
+    pattern: "starlin",
+    desc: "Chat with Starlin AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .starlin Your question");
+});
+
+cmd({
+    pattern: "deepseek",
+    desc: "Chat with DeepSeek AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .deepseek Your question");
+});
+
+cmd({
+    pattern: "deepseekcoder",
+    desc: "Chat with DeepSeek Coder AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .deepseekcoder Your question");
+});
+
+cmd({
+    pattern: "yi",
+    desc: "Chat with Yi AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .yi Your question");
+});
+
+cmd({
+    pattern: "yi34b",
+    desc: "Chat with Yi-34B AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .yi34b Your question");
+});
+
+cmd({
+    pattern: "qwen",
+    desc: "Chat with Qwen AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .qwen Your question");
+});
+
+cmd({
+    pattern: "command",
+    desc: "Chat with Command AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .command Your question");
+});
+
+cmd({
+    pattern: "jurassic",
+    desc: "Chat with Jurassic AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .jurassic Your question");
+});
+
+cmd({
+    pattern: "ai21",
+    desc: "Chat with AI21 Labs AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .ai21 Your question");
+});
+
+cmd({
+    pattern: "solar",
+    desc: "Chat with Solar AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .solar Your question");
+});
+
+cmd({
+    pattern: "lumin",
+    desc: "Chat with Lumin AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .lumin Your question");
+});
+
+cmd({
+    pattern: "grokbeta",
+    desc: "Chat with Grok Beta AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .grokbeta Your question");
+});
+
+cmd({
+    pattern: "bard",
+    desc: "Chat with Google Bard AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .bard Your question");
+});
+
+cmd({
+    pattern: "redpajama",
+    desc: "Chat with RedPajama AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .redpajama Your question");
+});
+
+cmd({
+    pattern: "dolly",
+    desc: "Chat with Dolly AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .dolly Your question");
+});
+
+cmd({
+    pattern: "codex",
+    desc: "Chat with Codex AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .codex Your question");
+});
+
+cmd({
+    pattern: "hugging",
+    desc: "Chat with HuggingChat AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .hugging Your question");
+});
+
+cmd({
+    pattern: "openassist",
+    desc: "Chat with OpenAssistant AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .openassist Your question");
+});
+
+cmd({
+    pattern: "gptneo",
+    desc: "Chat with GPT-Neo AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .gptneo Your question");
+});
+
+cmd({
+    pattern: "gptj",
+    desc: "Chat with GPT-J AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .gptj Your question");
+});
+
+cmd({
+    pattern: "bloomz",
+    desc: "Chat with BLOOMZ AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .bloomz Your question");
+});
+
+cmd({
+    pattern: "flant5",
+    desc: "Chat with FLAN-T5 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .flant5 Your question");
+});
+
+cmd({
+    pattern: "codegen",
+    desc: "Chat with CodeGen AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .codegen Your question");
+});
+
+cmd({
+    pattern: "starcoder",
+    desc: "Chat with StarCoder AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .starcoder Your question");
+});
+
+cmd({
+    pattern: "gpt3",
+    desc: "Chat with GPT-3 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .gpt3 Your question");
+});
+
+cmd({
+    pattern: "chatgptplus",
+    desc: "Chat with ChatGPT Plus AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .chatgptplus Your question");
+});
+
+cmd({
+    pattern: "gpt4turbo",
+    desc: "Chat with GPT-4 Turbo AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .gpt4turbo Your question");
+});
+
+cmd({
+    pattern: "claudeinstant",
+    desc: "Chat with Claude Instant AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .claudeinstant Your question");
+});
+
+cmd({
+    pattern: "claude2",
+    desc: "Chat with Claude 2 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .claude2 Your question");
+});
+
+cmd({
+    pattern: "palm2",
+    desc: "Chat with PaLM 2 AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .palm2 Your question");
+});
+
 cmd({
     pattern: "mathgpt",
     desc: "Solve math problems with MathGPT",
@@ -176,59 +765,4 @@ cmd({
 }, async (conn, mek, m, { q, reply }) => {
     const prompt = q ? ("Check grammar and spelling, then give corrected text: " + q) : q;
     await askAI(prompt, reply, "❌ *Usage:* .grammar Your text to check");
-});
-
-cmd({
-    pattern: "translate",
-    desc: "Translate text using AI",
-    category: "ai",
-    react: "🌍",
-    filename: __filename
-}, async (conn, mek, m, { q, reply }) => {
-    const prompt = q ? ("Translate the following text to English (or detect language and translate): " + q) : q;
-    await askAI(prompt, reply, "❌ *Usage:* .translate Your text");
-});
-
-cmd({
-    pattern: "code",
-    desc: "Generate or fix code with AI",
-    category: "ai",
-    react: "💻",
-    filename: __filename
-}, async (conn, mek, m, { q, reply }) => {
-    const prompt = q ? ("Write or fix the following code with explanation: " + q) : q;
-    await askAI(prompt, reply, "❌ *Usage:* .code Your code request");
-});
-
-cmd({
-    pattern: "explain",
-    desc: "Explain a concept using AI",
-    category: "ai",
-    react: "📚",
-    filename: __filename
-}, async (conn, mek, m, { q, reply }) => {
-    const prompt = q ? ("Explain this clearly with examples: " + q) : q;
-    await askAI(prompt, reply, "❌ *Usage:* .explain Topic");
-});
-
-cmd({
-    pattern: "summarize",
-    desc: "Summarize text using AI",
-    category: "ai",
-    react: "📋",
-    filename: __filename
-}, async (conn, mek, m, { q, reply }) => {
-    const prompt = q ? ("Summarize this text briefly: " + q) : q;
-    await askAI(prompt, reply, "❌ *Usage:* .summarize Your text");
-});
-
-cmd({
-    pattern: "story",
-    desc: "Generate a story with AI",
-    category: "ai",
-    react: "📖",
-    filename: __filename
-}, async (conn, mek, m, { q, reply }) => {
-    const prompt = q ? ("Write a short creative story about: " + q) : q;
-    await askAI(prompt, reply, "❌ *Usage:* .story Topic");
 });
