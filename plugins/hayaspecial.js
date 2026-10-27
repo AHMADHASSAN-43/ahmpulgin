@@ -9,31 +9,74 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 
-// Songs ki list - bas naye URL yahan add karte jao
-const hayaSongs = [
-    "https://files.catbox.moe/cs1158.opus",   // hayasong1
-    "https://files.catbox.moe/tda6ds.mp3",    // hayasong2
-    // "https://files.catbox.moe/xxxxx.mp3",  // hayasong3 aage add karna
-];
+// Song URLs - yahan naye songs add karte raho
+const songs = {
+    1: "https://files.catbox.moe/cs1158.opus",  // Haya Song 1 (default)
+    2: "https://files.catbox.moe/tda6ds.mp3",   // Haya Song 2 (naya)
+    // 3: "https://...",  // future songs yahan add karo
+};
 
-// Har song ke liye alag command (hayasong1, hayasong2, etc.)
-hayaSongs.forEach((songUrl, index) => {
-    const commandName = `hayasong${index + 1}`;
+// Base patterns
+const basePatterns = ["hayasong", "haya", "hsong"];
 
+// Sab patterns generate karo: base, base1, base2, base3...
+const patternLoop = [];
+basePatterns.forEach((base) => {
+    patternLoop.push(base);           // "hayasong"
+    Object.keys(songs).forEach((num) => {
+        patternLoop.push(`${base}${num}`);  // "hayasong1", "hayasong2"
+    });
+});
+
+patternLoop.forEach((ptrn) => {
     cmd({
-        pattern: commandName,
+        pattern: ptrn,
         category: "haya song",
         react: "⚡",
         filename: __filename
     },
     async (conn, mek, m, { from, reply }) => {
         try {
-            // Yahan { quoted: mek } hata diya hai taaki koi text/command quote na dikhe
+            // Pattern se song number nikaalo
+            // Example: "hayasong1" -> "1" | "hayasong" -> default 1
+            let songNum = null;
+
+            for (const base of basePatterns) {
+                if (ptrn === base) {
+                    songNum = 1; // default song
+                    break;
+                }
+                if (ptrn.startsWith(base)) {
+                    const suffix = ptrn.slice(base.length);
+                    if (/^\d+$/.test(suffix)) {
+                        songNum = parseInt(suffix);
+                        break;
+                    }
+                }
+            }
+
+            const audioUrl = songs[songNum];
+
+            if (!audioUrl) {
+                return reply(`❌ Song ${songNum} nahi mila. Available: ${Object.keys(songs).join(", ")}`);
+            }
+
+            // Audio file aur channel forwarding details
             await conn.sendMessage(from, {
-                audio: { url: songUrl },
+                audio: { url: audioUrl },
                 mimetype: 'audio/mpeg',
-                ptt: false
-            });
+                ptt: false,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363426472060176@newsletter',
+                        newsletterName: "HAYA SINGS❤️‍🩹",
+                        serverMessageId: 143
+                    }
+                }
+            }, { quoted: mek });
 
         } catch (e) {
             reply(`Error: ${e.message}`);
