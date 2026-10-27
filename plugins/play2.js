@@ -36,8 +36,8 @@ cmd({
     pattern: "play2",
 
     alias: [
-        "song",
-        "music"
+        "song2",
+        "music2"
     ],
 
     react: "🎧",
