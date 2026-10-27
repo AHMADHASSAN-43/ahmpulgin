@@ -9,17 +9,16 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 
-// Yahan songs ki list hai - bas naya URL add karte jao
+// Songs ki list - bas naye URL yahan add karte jao
 const hayaSongs = [
     "https://files.catbox.moe/cs1158.opus",   // hayasong1
     "https://files.catbox.moe/tda6ds.mp3",    // hayasong2
-    // "https://files.catbox.moe/xxxxx.mp3",  // hayasong3 - aage add karna
-    // "https://files.catbox.moe/xxxxx.mp3",  // hayasong4
+    // "https://files.catbox.moe/xxxxx.mp3",  // hayasong3 aage add karna
 ];
 
-// Har song ke liye alag command banayenge
+// Har song ke liye alag command (hayasong1, hayasong2, etc.)
 hayaSongs.forEach((songUrl, index) => {
-    const commandName = `hayasong${index + 1}`; // hayasong1, hayasong2, ...
+    const commandName = `hayasong${index + 1}`;
 
     cmd({
         pattern: commandName,
@@ -29,11 +28,12 @@ hayaSongs.forEach((songUrl, index) => {
     },
     async (conn, mek, m, { from, reply }) => {
         try {
+            // Yahan { quoted: mek } hata diya hai taaki koi text/command quote na dikhe
             await conn.sendMessage(from, {
                 audio: { url: songUrl },
                 mimetype: 'audio/mpeg',
                 ptt: false
-            }, { quoted: mek });
+            });
 
         } catch (e) {
             reply(`Error: ${e.message}`);
