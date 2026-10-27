@@ -1,6 +1,6 @@
-const { cmd } = require('../command');
-const axios = require('axios');
-const yts = require('yt-search');
+import { cmd } from '../command.js';
+import axios from 'axios';
+import yts from 'yt-search';
 
 cmd({
     pattern: "play",
@@ -8,7 +8,7 @@ cmd({
     desc: "Download YouTube audio via Adeel-Xtech API",
     category: "download",
     react: "🎶",
-    filename: __filename
+    filename: import.meta.url
 }, async (conn, mek, m, { from, q, reply }) => {
     try {
         const query = q ? q.trim() : "";
@@ -82,7 +82,7 @@ cmd({
 `🎥 *Channel:* ${video.author?.name || 'Unknown'}\n` +
 `👁️ *Views:* ${(video.views || 0).toLocaleString()}\n` +
 `⏳ *Duration:* ${video.timestamp || 'N/A'}\n\n` +
-`> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ-ᴍᴅ ⚡*`;
+`> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀᴅᴇᴇʟ-ᴍᴅ ⚡*`;
 
         try {
             await conn.sendMessage(from, {
