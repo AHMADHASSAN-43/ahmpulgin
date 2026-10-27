@@ -72,7 +72,7 @@ async (conn, mek, m, { from, pushname, reply }) => {
         let dec = `
   ${BOT_NAME.toUpperCase()}
 
-‎              *بِسْمِ اللّٰہِ الرَّحْمٰنِ الرَّحِیمِ*
+‎              *بِسْمِ اللّٰہِ الرَّحْمٰنِ الرَّحِیْمِ*
 ‎      ☝️ *اِیَّاکَ نَعۡبُدُ وَ اِیَّاکَ نَسۡتَعِیۡنُ* 
 
 ╭───────〔 *sʏsᴛᴇᴍ ɪɴғᴏ* 〕───────
@@ -89,29 +89,56 @@ ${menuSections}
 
         // Image URL Selection
         let imageToUse = "https://files.catbox.moe/2maqd9.jpg";
+        let catboxWorking = true;
 
-        // 1. Menu Image Send with Caption
-        await conn.sendMessage(from, { 
-            image: { url: imageToUse },
-            caption: dec, 
-            contextInfo: { 
-                mentionedJid: [m.sender], 
-                forwardingScore: 999, 
-                isForwarded: true, 
-                forwardedNewsletterMessageInfo: { 
-                    newsletterJid: '120363426472060176@newsletter', 
-                    newsletterName: "AHMADTech", 
-                    serverMessageId: 143 
+        // 1. Try Menu Image Send with Caption
+        try {
+            await conn.sendMessage(from, { 
+                image: { url: imageToUse },
+                caption: dec, 
+                contextInfo: { 
+                    mentionedJid: [m.sender], 
+                    forwardingScore: 999, 
+                    isForwarded: true, 
+                    forwardedNewsletterMessageInfo: { 
+                        newsletterJid: '120363426472060176@newsletter', 
+                        newsletterName: "AHMADTech", 
+                        serverMessageId: 143 
+                    } 
                 } 
-            } 
-        }, { quoted: mek });
+            }, { quoted: mek });
+        } catch (imgErr) {
+            // Catbox down — simple text-only menu fallback
+            catboxWorking = false;
+            console.log("Catbox image failed, sending simple menu:", imgErr.message);
+            await conn.sendMessage(from, {
+                text: dec,
+                contextInfo: { 
+                    mentionedJid: [m.sender], 
+                    forwardingScore: 999, 
+                    isForwarded: true, 
+                    forwardedNewsletterMessageInfo: { 
+                        newsletterJid: '120363426472060176@newsletter', 
+                        newsletterName: "AHMADTech", 
+                        serverMessageId: 143 
+                    } 
+                } 
+            }, { quoted: mek });
+        }
 
-        // 2. Audio File Send
-        await conn.sendMessage(from, {
-            audio: { url: "https://files.catbox.moe/yvvzji.mp3" },
-            mimetype: 'audio/mpeg',
-            ptt: false
-        }, { quoted: mek });
+        // 2. Audio File Send (only if catbox image worked)
+        if (catboxWorking) {
+            try {
+                await conn.sendMessage(from, {
+                    audio: { url: "https://files.catbox.moe/yvvzji.mp3" },
+                    mimetype: 'audio/mpeg',
+                    ptt: false
+                }, { quoted: mek });
+            } catch (audioErr) {
+                // Audio fail ho gaya to chup chaap skip — menu pehle hi ja chuka hai
+                console.log("Audio send failed (catbox down?), skipping:", audioErr.message);
+            }
+        }
 
     } catch (e) { 
         reply(`Error: ${e.message}`); 
