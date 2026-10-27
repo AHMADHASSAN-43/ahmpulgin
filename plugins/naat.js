@@ -1,86 +1,172 @@
-import { cmd } from "../command.js";
-import yts from "yt-search";
-import axios from "axios";
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-
-const API_CONFIG = {
-    AUDIO_API: Buffer.from("aHR0cHM6Ly9hcGkubmV4cmF5LmV1LmNjL2Rvd25sb2FkZXIvc2F2ZXR1YmU/dXJsPQ==", "base64").toString()
-};
-
-/**
- * Normalizes YouTube URLs to a standard format
- */
-function normalizeYouTubeUrl(url) {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/.*[?&]v=)([a-zA-Z0-9_-]{11})/);
-  return match ? `https://youtube.com/watch?v=${match[1]}` : null;
-}
-
-// --- NAAT COMMAND ---
+import { cmd } from '../command.js';
+import axios from 'axios';
+import yts from 'yt-search';
 
 cmd({
     pattern: "naat",
-    alias: ["playnaat", "naatmp3"],
-    desc: "Download Naat via name or link.",
-    category: "islamic",
+    alias: ["naats", "naatmp3", "islamicsong"],
+    desc: "Download Naat audio from YouTube via Adeel-Xtech API",
+    category: "download",
     react: "🕌",
-    filename: __filename
-},
-async (conn, mek, m, { from, args, q, reply }) => {
+    filename: import.meta.url
+}, async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return reply("❌ Please provide a Naat title or YouTube link!");
+        const query = q ? q.trim() : "";
 
-        // Search Reaction
-        await conn.sendMessage(from, { react: { text: "🔎", key: mek.key } });
+        if (!query) {
+            return reply("❌ Please provide a Naat name or YouTube link!\n\nExample:\n.naat Ayub Islamic\n.naat https://youtu.be/xxxxx");
+        }
 
-        let searchQuery = q;
-        let videoUrl = q;
-        let vid;
+        try {
+            await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
+        } catch (_) {}
 
-        // Check agar input link hai ya text
-        const isUrl = q.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/g);
+        let video;
+        const isYT = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(query);
 
-        if (isUrl) {
-            // Agar link hai to details fetch karo
-            const search = await yts({ videoId: q.split('v=')[1] || q.split('/').pop() });
-            vid = search;
-            videoUrl = q;
-        } else {
-            // Agar naam search ho raha hai to "Naat" keyword add kar dein behtar results ke liye
-            if (!q.toLowerCase().includes("naat")) {
-                searchQuery = `${q} Naat`;
+        if (isYT) {
+            let videoId = '';
+            try {
+                const urlObj = new URL(query);
+                if (urlObj.hostname === 'youtu.be') {
+                    videoId = urlObj.pathname.slice(1);
+                } else {
+                    videoId = urlObj.searchParams.get('v');
+                }
+            } catch {
+                videoId = query.split('/').pop().split('?')[0];
             }
+
+            if (!videoId) {
+                try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+                return reply("❌ Invalid YouTube link");
+            }
+
+            try {
+                const search = await yts(videoId);
+                if (search && search.videos && search.videos.length) {
+                    video = search.videos[0];
+                }
+            } catch (e) {}
+
+            if (!video) {
+                try {
+                    const search2 = await yts(`https://www.youtube.com/watch?v=${videoId}`);
+                    if (search2 && search2.videos && search2.videos.length) {
+                        video = search2.videos[0];
+                    }
+                } catch (e) {}
+            }
+
+            if (!video) {
+                video = {
+                    title: 'Unknown Naat',
+                    url: `https://www.youtube.com/watch?v=${videoId}`,
+                    thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+                    timestamp: 'N/A',
+                    views: 0,
+                    author: { name: 'Unknown' }
+                };
+            }
+        } else {
+            // Search with "naat" keyword automatically added
+            const searchQuery = `${query} naat`;
             const search = await yts(searchQuery);
-            if (!search || !search.videos.length) return reply("❌ No results found for this Naat.");
-            vid = search.videos[0];
-            videoUrl = vid.url;
+            if (!search.videos.length) {
+                try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+                return reply("❌ No Naat results found");
+            }
+            video = search.videos[0];
         }
 
-        // Preview Message
-        await conn.sendMessage(from, {
-            image: { url: vid.thumbnail || vid.image },
-            caption: `╭━━〔 🕌 𝗡𝗔𝗔𝗧 𝗙𝗢𝗨𝗡𝗗 〕━━━╮\n┃ 🎧 *Title* : ${vid.title}\n┃ ⏱️ *Duration* : ${vid.timestamp || 'N/A'}\n╰━━━━━━━━━━━━━━━━━╯\n\n⏳ *Downloading audio...*`
-        }, { quoted: mek });
+        const infoCaption =
+`🕌 *${video.title}*\n\n` +
+`🎙️ *Naat Khwan:* ${video.author?.name || 'Unknown'}\n` +
+`👁️ *Views:* ${(video.views || 0).toLocaleString()}\n` +
+`⏳ *Duration:* ${video.timestamp || 'N/A'}\n\n` +
+`> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀᴅᴇᴇʟ-ᴍᴅ ⚡*`;
 
-        // API Download
-        const apiUrl = `${API_CONFIG.AUDIO_API}${encodeURIComponent(videoUrl)}&quality=mp3`;
-        const { data } = await axios.get(apiUrl);
+        try {
+            await conn.sendMessage(from, {
+                image: { url: video.thumbnail },
+                caption: infoCaption
+            }, { quoted: mek });
+        } catch (_) {}
 
-        if (!data || !data.status || !data.result || !data.result.url) {
-            return reply("❌ API error! Try again later.");
+        let data;
+        try {
+            const apiRes = await axios.get('https://adeel-xtech-api.vercel.app/api/ytmp3', {
+                params: { url: video.url },
+                timeout: 45000,
+                validateStatus: () => true
+            });
+            data = apiRes.data;
+        } catch (apiErr) {
+            try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+            return reply(`❌ API error: ${apiErr?.message || apiErr}`);
         }
 
-        // Sending Audio
-        await conn.sendMessage(from, {
-            audio: { url: data.result.url },
-            mimetype: "audio/mpeg"
-        }, { quoted: mek });
+        if (!data?.status || !data?.result?.audio_download) {
+            try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+            return reply(`❌ ${data?.message || 'Failed to fetch Naat audio from server.'}`);
+        }
 
-        await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+        const res = data.result;
+        const title = (res.title || video.title || 'Naat').toString();
+        const audioUrl = res.audio_download;
 
-    } catch (err) {
-        console.error(err);
-        reply("❌ Error: " + err.message);
+        let sent = false;
+        let lastSendError = null;
+
+        try {
+            const file = await axios.get(audioUrl, {
+                responseType: 'arraybuffer',
+                timeout: 90000,
+                maxContentLength: 50 * 1024 * 1024,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Accept': '*/*'
+                }
+            });
+            const buffer = Buffer.from(file.data);
+            if (buffer.length > 1000) {
+                await conn.sendMessage(from, {
+                    audio: buffer,
+                    mimetype: 'audio/mpeg',
+                    fileName: `${title}.mp3`
+                }, { quoted: mek });
+                sent = true;
+            }
+        } catch (e) {
+            lastSendError = e?.message || String(e);
+        }
+
+        if (!sent) {
+            try {
+                await conn.sendMessage(from, {
+                    audio: { url: audioUrl },
+                    mimetype: 'audio/mpeg',
+                    fileName: `${title}.mp3`
+                }, { quoted: mek });
+                sent = true;
+            } catch (e) {
+                lastSendError = e?.message || String(e);
+            }
+        }
+
+        if (!sent) {
+            try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+            return reply(`❌ Naat audio send failed: ${lastSendError || 'unknown'}`);
+        }
+
+        try {
+            await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+        } catch (_) {}
+
+    } catch (e) {
+        const msg = e?.message || e?.toString?.() || 'Unexpected error';
+        console.error('Naat Command Error:', e);
+        try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+        reply(`❌ Error: ${msg}`);
     }
 });
