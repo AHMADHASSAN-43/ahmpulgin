@@ -26,7 +26,7 @@ async function askAI(q, reply, usage) {
 }
 
 cmd({
-    pattern: "copilot",
+    pattern: ["copilot", ".copilot"],
     desc: "Chat with Microsoft Copilot AI",
     category: "ai",
     react: "✨",
@@ -36,7 +36,7 @@ cmd({
 });
 
 cmd({
-    pattern: "chatgptelite",
+    pattern: ["chatgptelite", ".chatgptelite"],
     desc: "Chat with ChatGPT Elite AI",
     category: "ai",
     react: "🧠",
@@ -46,7 +46,7 @@ cmd({
 });
 
 cmd({
-    pattern: "talkai",
+    pattern: ["talkai", ".talkai"],
     desc: "Chat with Talk AI",
     category: "ai",
     react: "💬",
@@ -56,7 +56,7 @@ cmd({
 });
 
 cmd({
-    pattern: "brain",
+    pattern: ["brain", ".brain"],
     desc: "Chat with Brain AI",
     category: "ai",
     react: "🧠",
@@ -66,7 +66,7 @@ cmd({
 });
 
 cmd({
-    pattern: "elite",
+    pattern: ["elite", ".elite"],
     desc: "Chat with Elite AI Assistant",
     category: "ai",
     react: "👑",
@@ -76,7 +76,7 @@ cmd({
 });
 
 cmd({
-    pattern: "mscopilot",
+    pattern: ["mscopilot", ".mscopilot"],
     desc: "Chat with Microsoft Copilot",
     category: "ai",
     react: "💙",
@@ -86,7 +86,7 @@ cmd({
 });
 
 cmd({
-    pattern: "elitegpt",
+    pattern: ["elitegpt", ".elitegpt"],
     desc: "Chat with Elite ChatGPT",
     category: "ai",
     react: "🤖",
@@ -96,7 +96,7 @@ cmd({
 });
 
 cmd({
-    pattern: "assistant",
+    pattern: ["assistant", ".assistant"],
     desc: "Chat with AI Assistant",
     category: "ai",
     react: "🤵",
@@ -106,7 +106,7 @@ cmd({
 });
 
 cmd({
-    pattern: "smart",
+    pattern: ["smart", ".smart"],
     desc: "Chat with Smart AI",
     category: "ai",
     react: "🧠",
@@ -116,7 +116,7 @@ cmd({
 });
 
 cmd({
-    pattern: "genius",
+    pattern: ["genius", ".genius"],
     desc: "Chat with Genius AI",
     category: "ai",
     react: "🌟",
@@ -126,7 +126,7 @@ cmd({
 });
 
 cmd({
-    pattern: "proai",
+    pattern: ["proai", ".proai"],
     desc: "Chat with Pro AI",
     category: "ai",
     react: "⚡",
@@ -136,7 +136,7 @@ cmd({
 });
 
 cmd({
-    pattern: "elitecopilot",
+    pattern: ["elitecopilot", ".elitecopilot"],
     desc: "Chat with Elite Copilot",
     category: "ai",
     react: "🎯",
@@ -146,7 +146,7 @@ cmd({
 });
 
 cmd({
-    pattern: "ultra",
+    pattern: ["ultra", ".ultra"],
     desc: "Chat with Ultra AI",
     category: "ai",
     react: "🔥",
@@ -156,7 +156,7 @@ cmd({
 });
 
 cmd({
-    pattern: "maxai",
+    pattern: ["maxai", ".maxai"],
     desc: "Chat with Max AI",
     category: "ai",
     react: "💪",
@@ -166,7 +166,7 @@ cmd({
 });
 
 cmd({
-    pattern: "nova",
+    pattern: ["nova", ".nova"],
     desc: "Chat with Nova AI",
     category: "ai",
     react: "⭐",
@@ -176,7 +176,7 @@ cmd({
 });
 
 cmd({
-    pattern: "zenith",
+    pattern: ["zenith", ".zenith"],
     desc: "Chat with Zenith AI",
     category: "ai",
     react: "✨",
@@ -186,7 +186,7 @@ cmd({
 });
 
 cmd({
-    pattern: "apex",
+    pattern: ["apex", ".apex"],
     desc: "Chat with Apex AI",
     category: "ai",
     react: "🏆",
@@ -196,7 +196,7 @@ cmd({
 });
 
 cmd({
-    pattern: "vertex",
+    pattern: ["vertex", ".vertex"],
     desc: "Chat with Vertex AI",
     category: "ai",
     react: "🔷",
@@ -206,7 +206,7 @@ cmd({
 });
 
 cmd({
-    pattern: "pulse",
+    pattern: ["pulse", ".pulse"],
     desc: "Chat with Pulse AI",
     category: "ai",
     react: "💓",
@@ -216,7 +216,7 @@ cmd({
 });
 
 cmd({
-    pattern: "quantum",
+    pattern: ["quantum", ".quantum"],
     desc: "Chat with Quantum AI",
     category: "ai",
     react: "⚛️",
@@ -226,7 +226,7 @@ cmd({
 });
 
 cmd({
-    pattern: "neo",
+    pattern: ["neo", ".neo"],
     desc: "Chat with Neo AI",
     category: "ai",
     react: "💚",
@@ -236,7 +236,7 @@ cmd({
 });
 
 cmd({
-    pattern: "omega",
+    pattern: ["omega", ".omega"],
     desc: "Chat with Omega AI",
     category: "ai",
     react: "🔱",
@@ -246,7 +246,7 @@ cmd({
 });
 
 cmd({
-    pattern: "gpt",
+    pattern: ["gpt", ".gpt"],
     desc: "Chat with GPT-3.5 AI",
     category: "ai",
     react: "🤖",
@@ -256,7 +256,7 @@ cmd({
 });
 
 cmd({
-    pattern: "gpt4",
+    pattern: ["gpt4", ".gpt4"],
     desc: "Chat with GPT-4 AI",
     category: "ai",
     react: "🤖",
@@ -266,7 +266,7 @@ cmd({
 });
 
 cmd({
-    pattern: "gpt4o",
+    pattern: ["gpt4o", ".gpt4o"],
     desc: "Chat with GPT-4o AI",
     category: "ai",
     react: "🤖",
@@ -276,7 +276,7 @@ cmd({
 });
 
 cmd({
-    pattern: "chatgpt",
+    pattern: ["chatgpt", ".chatgpt"],
     desc: "Chat with ChatGPT AI",
     category: "ai",
     react: "🤖",
@@ -286,7 +286,7 @@ cmd({
 });
 
 cmd({
-    pattern: "claude",
+    pattern: ["claude", ".claude"],
     desc: "Chat with Claude AI",
     category: "ai",
     react: "🤖",
@@ -296,7 +296,7 @@ cmd({
 });
 
 cmd({
-    pattern: "gemini",
+    pattern: ["gemini", ".gemini"],
     desc: "Chat with Google Gemini AI",
     category: "ai",
     react: "🤖",
@@ -306,7 +306,7 @@ cmd({
 });
 
 cmd({
-    pattern: "kimi",
+    pattern: ["kimi", ".kimi"],
     desc: "Chat with Kimi AI",
     category: "ai",
     react: "🤖",
@@ -316,7 +316,7 @@ cmd({
 });
 
 cmd({
-    pattern: "perplexity",
+    pattern: ["perplexity", ".perplexity"],
     desc: "Chat with Perplexity AI",
     category: "ai",
     react: "🤖",
@@ -326,7 +326,7 @@ cmd({
 });
 
 cmd({
-    pattern: "llama2",
+    pattern: ["llama2", ".llama2"],
     desc: "Chat with Llama 2 AI",
     category: "ai",
     react: "🤖",
@@ -336,7 +336,7 @@ cmd({
 });
 
 cmd({
-    pattern: "llama3",
+    pattern: ["llama3", ".llama3"],
     desc: "Chat with Llama 3 AI",
     category: "ai",
     react: "🤖",
@@ -346,7 +346,7 @@ cmd({
 });
 
 cmd({
-    pattern: "mistral",
+    pattern: ["mistral", ".mistral"],
     desc: "Chat with Mistral AI",
     category: "ai",
     react: "🤖",
@@ -356,7 +356,7 @@ cmd({
 });
 
 cmd({
-    pattern: "mixtral",
+    pattern: ["mixtral", ".mixtral"],
     desc: "Chat with Mixtral AI",
     category: "ai",
     react: "🤖",
@@ -366,7 +366,7 @@ cmd({
 });
 
 cmd({
-    pattern: "falcon",
+    pattern: ["falcon", ".falcon"],
     desc: "Chat with Falcon AI",
     category: "ai",
     react: "🤖",
@@ -376,7 +376,7 @@ cmd({
 });
 
 cmd({
-    pattern: "bloom",
+    pattern: ["bloom", ".bloom"],
     desc: "Chat with BLOOM AI",
     category: "ai",
     react: "🤖",
@@ -386,7 +386,7 @@ cmd({
 });
 
 cmd({
-    pattern: "orca",
+    pattern: ["orca", ".orca"],
     desc: "Chat with Orca AI",
     category: "ai",
     react: "🤖",
@@ -396,7 +396,7 @@ cmd({
 });
 
 cmd({
-    pattern: "vicuna",
+    pattern: ["vicuna", ".vicuna"],
     desc: "Chat with Vicuna AI",
     category: "ai",
     react: "🤖",
@@ -406,7 +406,7 @@ cmd({
 });
 
 cmd({
-    pattern: "alpaca",
+    pattern: ["alpaca", ".alpaca"],
     desc: "Chat with Alpaca AI",
     category: "ai",
     react: "🤖",
@@ -416,7 +416,7 @@ cmd({
 });
 
 cmd({
-    pattern: "phi2",
+    pattern: ["phi2", ".phi2"],
     desc: "Chat with Phi-2 AI",
     category: "ai",
     react: "🤖",
@@ -426,7 +426,7 @@ cmd({
 });
 
 cmd({
-    pattern: "wizard",
+    pattern: ["wizard", ".wizard"],
     desc: "Chat with Wizard AI",
     category: "ai",
     react: "🤖",
@@ -436,7 +436,7 @@ cmd({
 });
 
 cmd({
-    pattern: "codet5",
+    pattern: ["codet5", ".codet5"],
     desc: "Chat with CodeT5 AI",
     category: "ai",
     react: "🤖",
@@ -446,7 +446,7 @@ cmd({
 });
 
 cmd({
-    pattern: "starlin",
+    pattern: ["starlin", ".starlin"],
     desc: "Chat with Starlin AI",
     category: "ai",
     react: "🤖",
@@ -456,7 +456,7 @@ cmd({
 });
 
 cmd({
-    pattern: "deepseek",
+    pattern: ["deepseek", ".deepseek"],
     desc: "Chat with DeepSeek AI",
     category: "ai",
     react: "🤖",
@@ -466,7 +466,7 @@ cmd({
 });
 
 cmd({
-    pattern: "deepseekcoder",
+    pattern: ["deepseekcoder", ".deepseekcoder"],
     desc: "Chat with DeepSeek Coder AI",
     category: "ai",
     react: "🤖",
@@ -476,7 +476,7 @@ cmd({
 });
 
 cmd({
-    pattern: "yi",
+    pattern: ["yi", ".yi"],
     desc: "Chat with Yi AI",
     category: "ai",
     react: "🤖",
@@ -486,7 +486,7 @@ cmd({
 });
 
 cmd({
-    pattern: "yi34b",
+    pattern: ["yi34b", ".yi34b"],
     desc: "Chat with Yi-34B AI",
     category: "ai",
     react: "🤖",
@@ -496,7 +496,7 @@ cmd({
 });
 
 cmd({
-    pattern: "qwen",
+    pattern: ["qwen", ".qwen"],
     desc: "Chat with Qwen AI",
     category: "ai",
     react: "🤖",
@@ -506,7 +506,7 @@ cmd({
 });
 
 cmd({
-    pattern: "command",
+    pattern: ["command", ".command"],
     desc: "Chat with Command AI",
     category: "ai",
     react: "🤖",
@@ -516,7 +516,7 @@ cmd({
 });
 
 cmd({
-    pattern: "jurassic",
+    pattern: ["jurassic", ".jurassic"],
     desc: "Chat with Jurassic AI",
     category: "ai",
     react: "🤖",
@@ -526,7 +526,7 @@ cmd({
 });
 
 cmd({
-    pattern: "ai21",
+    pattern: ["ai21", ".ai21"],
     desc: "Chat with AI21 Labs AI",
     category: "ai",
     react: "🤖",
@@ -536,7 +536,7 @@ cmd({
 });
 
 cmd({
-    pattern: "solar",
+    pattern: ["solar", ".solar"],
     desc: "Chat with Solar AI",
     category: "ai",
     react: "🤖",
@@ -546,7 +546,7 @@ cmd({
 });
 
 cmd({
-    pattern: "lumin",
+    pattern: ["lumin", ".lumin"],
     desc: "Chat with Lumin AI",
     category: "ai",
     react: "🤖",
@@ -556,7 +556,7 @@ cmd({
 });
 
 cmd({
-    pattern: "grokbeta",
+    pattern: ["grokbeta", ".grokbeta"],
     desc: "Chat with Grok Beta AI",
     category: "ai",
     react: "🤖",
@@ -566,7 +566,7 @@ cmd({
 });
 
 cmd({
-    pattern: "bard",
+    pattern: ["bard", ".bard"],
     desc: "Chat with Google Bard AI",
     category: "ai",
     react: "🤖",
@@ -576,7 +576,7 @@ cmd({
 });
 
 cmd({
-    pattern: "redpajama",
+    pattern: ["redpajama", ".redpajama"],
     desc: "Chat with RedPajama AI",
     category: "ai",
     react: "🤖",
@@ -586,7 +586,7 @@ cmd({
 });
 
 cmd({
-    pattern: "dolly",
+    pattern: ["dolly", ".dolly"],
     desc: "Chat with Dolly AI",
     category: "ai",
     react: "🤖",
@@ -596,7 +596,7 @@ cmd({
 });
 
 cmd({
-    pattern: "codex",
+    pattern: ["codex", ".codex"],
     desc: "Chat with Codex AI",
     category: "ai",
     react: "🤖",
@@ -606,7 +606,7 @@ cmd({
 });
 
 cmd({
-    pattern: "hugging",
+    pattern: ["hugging", ".hugging"],
     desc: "Chat with HuggingChat AI",
     category: "ai",
     react: "🤖",
@@ -616,7 +616,7 @@ cmd({
 });
 
 cmd({
-    pattern: "openassist",
+    pattern: ["openassist", ".openassist"],
     desc: "Chat with OpenAssistant AI",
     category: "ai",
     react: "🤖",
@@ -626,7 +626,7 @@ cmd({
 });
 
 cmd({
-    pattern: "gptneo",
+    pattern: ["gptneo", ".gptneo"],
     desc: "Chat with GPT-Neo AI",
     category: "ai",
     react: "🤖",
@@ -636,7 +636,7 @@ cmd({
 });
 
 cmd({
-    pattern: "gptj",
+    pattern: ["gptj", ".gptj"],
     desc: "Chat with GPT-J AI",
     category: "ai",
     react: "🤖",
@@ -646,7 +646,7 @@ cmd({
 });
 
 cmd({
-    pattern: "bloomz",
+    pattern: ["bloomz", ".bloomz"],
     desc: "Chat with BLOOMZ AI",
     category: "ai",
     react: "🤖",
@@ -656,7 +656,7 @@ cmd({
 });
 
 cmd({
-    pattern: "flant5",
+    pattern: ["flant5", ".flant5"],
     desc: "Chat with FLAN-T5 AI",
     category: "ai",
     react: "🤖",
@@ -666,7 +666,7 @@ cmd({
 });
 
 cmd({
-    pattern: "codegen",
+    pattern: ["codegen", ".codegen"],
     desc: "Chat with CodeGen AI",
     category: "ai",
     react: "🤖",
@@ -676,7 +676,7 @@ cmd({
 });
 
 cmd({
-    pattern: "starcoder",
+    pattern: ["starcoder", ".starcoder"],
     desc: "Chat with StarCoder AI",
     category: "ai",
     react: "🤖",
@@ -686,7 +686,7 @@ cmd({
 });
 
 cmd({
-    pattern: "gpt3",
+    pattern: ["gpt3", ".gpt3"],
     desc: "Chat with GPT-3 AI",
     category: "ai",
     react: "🤖",
@@ -696,7 +696,7 @@ cmd({
 });
 
 cmd({
-    pattern: "chatgptplus",
+    pattern: ["chatgptplus", ".chatgptplus"],
     desc: "Chat with ChatGPT Plus AI",
     category: "ai",
     react: "🤖",
@@ -706,7 +706,7 @@ cmd({
 });
 
 cmd({
-    pattern: "gpt4turbo",
+    pattern: ["gpt4turbo", ".gpt4turbo"],
     desc: "Chat with GPT-4 Turbo AI",
     category: "ai",
     react: "🤖",
@@ -716,7 +716,7 @@ cmd({
 });
 
 cmd({
-    pattern: "claudeinstant",
+    pattern: ["claudeinstant", ".claudeinstant"],
     desc: "Chat with Claude Instant AI",
     category: "ai",
     react: "🤖",
@@ -726,7 +726,7 @@ cmd({
 });
 
 cmd({
-    pattern: "claude2",
+    pattern: ["claude2", ".claude2"],
     desc: "Chat with Claude 2 AI",
     category: "ai",
     react: "🤖",
@@ -736,7 +736,7 @@ cmd({
 });
 
 cmd({
-    pattern: "palm2",
+    pattern: ["ahmed", ".ahmed"],
     desc: "Chat with PaLM 2 AI",
     category: "ai",
     react: "🤖",
@@ -746,7 +746,7 @@ cmd({
 });
 
 cmd({
-    pattern: "mathgpt",
+    pattern: ["mathgpt", ".mathgpt"],
     desc: "Solve math problems with MathGPT",
     category: "ai",
     react: "🧮",
@@ -757,7 +757,7 @@ cmd({
 });
 
 cmd({
-    pattern: "grammar",
+    pattern: ["grammar", ".grammar"],
     desc: "Check grammar and spelling",
     category: "ai",
     react: "📝",
