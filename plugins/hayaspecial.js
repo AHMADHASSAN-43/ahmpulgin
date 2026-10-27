@@ -9,37 +9,34 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 
-// Teeno patterns jo menu me show karne hain
-const patternLoop = ["hayasong", "haya", "hsong"];
+// Yahan songs ki list hai - bas naya URL add karte jao
+const hayaSongs = [
+    "https://files.catbox.moe/cs1158.opus",   // hayasong1
+    "https://files.catbox.moe/tda6ds.mp3",    // hayasong2
+    // "https://files.catbox.moe/xxxxx.mp3",  // hayasong3 - aage add karna
+    // "https://files.catbox.moe/xxxxx.mp3",  // hayasong4
+];
 
-patternLoop.forEach((ptrn) => {
+// Har song ke liye alag command banayenge
+hayaSongs.forEach((songUrl, index) => {
+    const commandName = `hayasong${index + 1}`; // hayasong1, hayasong2, ...
+
     cmd({
-        pattern: ptrn,
-        category: "haya song", // Teeno ko ek hi special category dedi taaki menu me alag se block bane
+        pattern: commandName,
+        category: "haya song",
         react: "⚡",
         filename: __filename
     },
     async (conn, mek, m, { from, reply }) => {
         try {
-            // Audio file aur channel forwarding details
             await conn.sendMessage(from, {
-                audio: { url: "https://files.catbox.moe/cs1158.opus" },
+                audio: { url: songUrl },
                 mimetype: 'audio/mpeg',
-                ptt: false, 
-                contextInfo: { 
-                    mentionedJid: [m.sender], 
-                    forwardingScore: 999, 
-                    isForwarded: true, 
-                    forwardedNewsletterMessageInfo: { 
-                        newsletterJid: '120363426472060176@newsletter', 
-                        newsletterName: "HAYA SINGS❤️‍🩹", 
-                        serverMessageId: 143 
-                    } 
-                }
+                ptt: false
             }, { quoted: mek });
 
-        } catch (e) { 
-            reply(`Error: ${e.message}`); 
-        } 
+        } catch (e) {
+            reply(`Error: ${e.message}`);
+        }
     });
 });
