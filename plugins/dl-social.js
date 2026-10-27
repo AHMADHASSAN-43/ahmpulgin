@@ -1,7 +1,7 @@
 // AHMAD Tech
 import { cmd } from "../command.js";
 import fetch from 'node-fetch';
-import * as converter from '../lib/converter.js'; // Add converter
+import converter from '../lib/converter.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
