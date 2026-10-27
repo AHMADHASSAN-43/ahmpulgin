@@ -61,21 +61,11 @@ patternLoop.forEach((ptrn) => {
                 return reply(`❌ Song ${songNum} nahi mila. Available: ${Object.keys(songs).join(", ")}`);
             }
 
-            // Audio file aur channel forwarding details
+            // Audio file bhejo (channel forwarding removed)
             await conn.sendMessage(from, {
                 audio: { url: audioUrl },
                 mimetype: 'audio/mpeg',
-                ptt: false,
-                contextInfo: {
-                    mentionedJid: [m.sender],
-                    forwardingScore: 999,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: '120363426472060176@newsletter',
-                        newsletterName: "HAYA SINGS❤️‍🩹",
-                        serverMessageId: 143
-                    }
-                }
+                ptt: false
             }, { quoted: mek });
 
         } catch (e) {
