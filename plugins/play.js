@@ -82,7 +82,7 @@ cmd({
 `🎥 *Channel:* ${video.author?.name || 'Unknown'}\n` +
 `👁️ *Views:* ${(video.views || 0).toLocaleString()}\n` +
 `⏳ *Duration:* ${video.timestamp || 'N/A'}\n\n` +
-`> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀᴅᴇᴇʟ-ᴍᴅ ⚡*`;
+`> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ-ᴍᴅ ⚡*`;
 
         try {
             await conn.sendMessage(from, {
