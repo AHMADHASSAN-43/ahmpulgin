@@ -1,5 +1,5 @@
-const axios = require('axios');
-const {
+import axios from 'axios';
+import {
     isChatbotEnabled,
     getHistory,
     addToHistory,
@@ -16,7 +16,7 @@ const {
     greetingReply,
     trimReply,
     normalizeId
-} = require('../lib/chatbot');
+} from '../lib/chatbot.js';
 
 const PERSONA = `Tum ek real Pakistani friend ho. WhatsApp pe normal insan ki tarah baat karo.
 
@@ -203,6 +203,5 @@ async function handleChatbotMessage(conn, mek, m, { from, body, isCmd, userConfi
     }
 }
 
-module.exports = {
-    handleChatbotMessage
-};
+export { handleChatbotMessage };
+export default { handleChatbotMessage };
