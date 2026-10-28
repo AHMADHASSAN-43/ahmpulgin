@@ -12,19 +12,21 @@ const __filename = fileURLToPath(import.meta.url);
 // Song URLs - yahan naye songs add karte raho
 const songs = {
     1: "https://files.catbox.moe/cs1158.opus",  // Haya Song 1 (default)
-    2: "https://files.catbox.moe/tda6ds.mp3",   // Haya Song 2 (naya)
-    // 3: "https://...",  // future songs yahan add karo
+    2: "https://files.catbox.moe/tda6ds.mp3",   // Haya Song 2
+    3: "https://files.catbox.moe/aaz9sm.mp3",   // Haya Song 3
+    4: "https://files.catbox.moe/co1nob.mp3",   // Haya Song 4
+    // 5: "https://...",  // future songs yahan add karo
 };
 
 // Base patterns
 const basePatterns = ["hayasong", "haya", "hsong"];
 
-// Sab patterns generate karo: base, base1, base2, base3...
+// Sab patterns generate karo: base, base1, base2, base3, base4...
 const patternLoop = [];
 basePatterns.forEach((base) => {
     patternLoop.push(base);           // "hayasong"
     Object.keys(songs).forEach((num) => {
-        patternLoop.push(`${base}${num}`);  // "hayasong1", "hayasong2"
+        patternLoop.push(`${base}${num}`);  // "hayasong1", "hayasong2", "hayasong3", "hayasong4"
     });
 });
 
