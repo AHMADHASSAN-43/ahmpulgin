@@ -3,6 +3,7 @@ import { cmd, commands } from '../command.js';
 import path from 'path';
 import os from "os";
 import fs from 'fs';
+import { spawn } from 'child_process';
 import { runtime } from '../lib/functions.js';
 import axios from 'axios';
 import { fileURLToPath } from 'url';
@@ -31,6 +32,52 @@ const formatCategory = (category, cmds) => {
     let footer = `\n│\n╰───────────────────────────────\n`;
     
     return `${title}${body}${footer}`;
+};
+
+// --- VOICE NOTE SUPPORT ---
+const MENU_AUDIO_URL = "https://files.catbox.moe/yvvzji.mp3";
+let cachedVoice = null; // { buffer, mimetype } - ek baar download/convert, phir cache se foran
+
+// mp3 -> ogg/opus (WhatsApp ka asli voice note format). ffmpeg na ho to null deta hai.
+const toOpus = (inputBuffer) => new Promise((resolve) => {
+    try {
+        const ff = spawn('ffmpeg', [
+            '-i', 'pipe:0',
+            '-vn',
+            '-c:a', 'libopus',
+            '-b:a', '48k',
+            '-ar', '48000',
+            '-ac', '1',
+            '-f', 'ogg',
+            'pipe:1'
+        ]);
+        const chunks = [];
+        let failed = false;
+        ff.stdout.on('data', (d) => chunks.push(d));
+        ff.stderr.on('data', () => {});
+        ff.on('error', () => { failed = true; resolve(null); });
+        ff.on('close', (code) => {
+            if (failed) return;
+            const out = Buffer.concat(chunks);
+            resolve(code === 0 && out.length > 0 ? out : null);
+        });
+        ff.stdin.on('error', () => {});
+        ff.stdin.end(inputBuffer);
+    } catch (e) {
+        resolve(null);
+    }
+});
+
+const getVoiceNote = async () => {
+    if (cachedVoice) return cachedVoice;
+    const res = await axios.get(MENU_AUDIO_URL, { responseType: 'arraybuffer', timeout: 20000 });
+    const mp3 = Buffer.from(res.data);
+
+    const opus = await toOpus(mp3);
+    cachedVoice = opus
+        ? { buffer: opus, mimetype: 'audio/ogg; codecs=opus' }
+        : { buffer: mp3, mimetype: 'audio/mpeg' }; // ffmpeg nahi mila: mp3 ko hi voice note ki tarah bhejo
+    return cachedVoice;
 };
 
 cmd({
@@ -116,15 +163,16 @@ ${menuSections}
             }, { quoted: mek });
         }
 
-        // 2. Audio File Send (agar fail ho to chupchap skip)
+        // 2. Audio ko VOICE NOTE (ptt) ki surat mein bhejna (fail ho to chupchap skip)
         try {
+            const voice = await getVoiceNote();
             await conn.sendMessage(from, {
-                audio: { url: "https://files.catbox.moe/yvvzji.mp3" },
-                mimetype: 'audio/mpeg',
-                ptt: false
+                audio: voice.buffer,
+                mimetype: voice.mimetype,
+                ptt: true
             }, { quoted: mek });
         } catch (audioErr) {
-            console.log("Menu audio failed, skipping:", audioErr.message);
+            console.log("Menu voice note failed, skipping:", audioErr.message);
         }
 
     } catch (e) { 
