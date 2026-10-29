@@ -36,18 +36,33 @@ const formatCategory = (category, cmds) => {
 
 // --- VOICE NOTE SUPPORT ---
 const MENU_AUDIO_URL = "https://files.catbox.moe/yvvzji.mp3";
-let cachedVoice = null; // { buffer, mimetype } - ek baar download/convert, phir cache se foran
+let cachedVoice = null; // { buffer, mimetype, ptt } - ek baar banao, phir cache se foran
 
-// mp3 -> ogg/opus (WhatsApp ka asli voice note format). ffmpeg na ho to null deta hai.
-const toOpus = (inputBuffer) => new Promise((resolve) => {
+// ffmpeg dhoondo: pehle FFMPEG_PATH, phir system ffmpeg, phir npm packages (ffmpeg-static / @ffmpeg-installer/ffmpeg)
+const findFfmpegPaths = async () => {
+    const list = [];
+    if (process.env.FFMPEG_PATH) list.push(process.env.FFMPEG_PATH);
+    list.push('ffmpeg');
+    for (const pkg of ['ffmpeg-static', '@ffmpeg-installer/ffmpeg']) {
+        try {
+            const mod = await import(pkg);
+            const p = mod.default?.path || mod.default || mod.path;
+            if (typeof p === 'string') list.push(p);
+        } catch (e) {}
+    }
+    return list;
+};
+
+const runFfmpeg = (bin, inputBuffer) => new Promise((resolve) => {
     try {
-        const ff = spawn('ffmpeg', [
+        const ff = spawn(bin, [
             '-i', 'pipe:0',
             '-vn',
             '-c:a', 'libopus',
-            '-b:a', '48k',
+            '-b:a', '64k',
             '-ar', '48000',
             '-ac', '1',
+            '-application', 'voip',
             '-f', 'ogg',
             'pipe:1'
         ]);
@@ -59,7 +74,9 @@ const toOpus = (inputBuffer) => new Promise((resolve) => {
         ff.on('close', (code) => {
             if (failed) return;
             const out = Buffer.concat(chunks);
-            resolve(code === 0 && out.length > 0 ? out : null);
+            // sahi ogg file "OggS" se shuru hoti hai
+            const ok = code === 0 && out.length > 1000 && out.slice(0, 4).toString() === 'OggS';
+            resolve(ok ? out : null);
         });
         ff.stdin.on('error', () => {});
         ff.stdin.end(inputBuffer);
@@ -68,15 +85,28 @@ const toOpus = (inputBuffer) => new Promise((resolve) => {
     }
 });
 
+const toOpus = async (inputBuffer) => {
+    for (const bin of await findFfmpegPaths()) {
+        const out = await runFfmpeg(bin, inputBuffer);
+        if (out) return out;
+    }
+    return null;
+};
+
 const getVoiceNote = async () => {
     if (cachedVoice) return cachedVoice;
     const res = await axios.get(MENU_AUDIO_URL, { responseType: 'arraybuffer', timeout: 20000 });
     const mp3 = Buffer.from(res.data);
 
     const opus = await toOpus(mp3);
-    cachedVoice = opus
-        ? { buffer: opus, mimetype: 'audio/ogg; codecs=opus' }
-        : { buffer: mp3, mimetype: 'audio/mpeg' }; // ffmpeg nahi mila: mp3 ko hi voice note ki tarah bhejo
+    if (opus) {
+        cachedVoice = { buffer: opus, mimetype: 'audio/ogg; codecs=opus', ptt: true };
+    } else {
+        // ffmpeg nahi mila: mp3 ko voice note banane se WhatsApp error deta hai,
+        // isliye normal audio ki tarah bhejo (ye hamesha play hota hai)
+        console.log("ffmpeg not found - install it: npm i ffmpeg-static  (tab voice note ban jayega)");
+        cachedVoice = { buffer: mp3, mimetype: 'audio/mpeg', ptt: false };
+    }
     return cachedVoice;
 };
 
@@ -169,7 +199,7 @@ ${menuSections}
             await conn.sendMessage(from, {
                 audio: voice.buffer,
                 mimetype: voice.mimetype,
-                ptt: true
+                ptt: voice.ptt
             }, { quoted: mek });
         } catch (audioErr) {
             console.log("Menu voice note failed, skipping:", audioErr.message);
