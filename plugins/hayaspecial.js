@@ -16,6 +16,7 @@ const songs = {
     2: "https://files.catbox.moe/tda6ds.mp3",   // Haya Song 2
     3: "https://files.catbox.moe/aaz9sm.mp3",   // Haya Song 3
     4: "https://files.catbox.moe/co1nob.mp3",   // Haya Song 4
+    5: "https://files.catbox.moe/0neky1.mp3",   // Haya Song 5
     // 5: "https://...",  // future songs yahan add karo
 };
 
@@ -151,7 +152,7 @@ patternLoop.forEach((ptrn) => {
                 audio: voice.buffer,
                 mimetype: voice.mimetype,
                 ptt: voice.ptt
-            }, { quoted: mek });
+            }); // quoted hata diya: command ka reply/quote nahi dikhega, sirf asli voice note
 
         } catch (e) {
             reply(`Error: ${e.message}`);
