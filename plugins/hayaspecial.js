@@ -17,7 +17,10 @@ const songs = {
     3: "https://files.catbox.moe/aaz9sm.mp3",   // Haya Song 3
     4: "https://files.catbox.moe/co1nob.mp3",   // Haya Song 4
     5: "https://files.catbox.moe/0neky1.mp3",   // Haya Song 5
-    // 5: "https://...",  // future songs yahan add karo
+    6: "https://files.catbox.moe/y26pp6.m4a",   // Haya Song 6
+    7: "https://files.catbox.moe/96l81l.m4a",   // Haya Song 7
+    8: "https://files.catbox.moe/8wcrm2.m4a",   // Haya Song 8
+    // 9: "https://...",  // future songs yahan add karo
 };
 
 // --- VOICE NOTE SUPPORT ---
@@ -78,6 +81,15 @@ const toOpus = async (inputBuffer) => {
     return null;
 };
 
+// URL ke extension se sahi mimetype chuno (ffmpeg na ho to fallback ke liye)
+const getFallbackMime = (url) => {
+    const ext = path.extname(url.split('?')[0]).toLowerCase();
+    if (ext === '.m4a' || ext === '.mp4') return 'audio/mp4';
+    if (ext === '.ogg' || ext === '.opus') return 'audio/ogg; codecs=opus';
+    if (ext === '.wav') return 'audio/wav';
+    return 'audio/mpeg';
+};
+
 const getVoiceNote = async (songNum, url) => {
     if (voiceCache[songNum]) return voiceCache[songNum];
 
@@ -92,10 +104,10 @@ const getVoiceNote = async (songNum, url) => {
         // file pehle se ogg/opus hai (jaise .opus song): seedha voice note
         result = { buffer: original, mimetype: 'audio/ogg; codecs=opus', ptt: true };
     } else {
-        // ffmpeg nahi mila: mp3 ko voice note banane se WhatsApp error deta hai,
-        // isliye normal audio ki tarah bhejo (ye hamesha play hota hai)
+        // ffmpeg nahi mila: mp3/m4a ko voice note banane se WhatsApp error deta hai,
+        // isliye normal audio ki tarah bhejo (extension ke hisaab se sahi mimetype ke saath)
         console.log("ffmpeg not found - install it: npm i ffmpeg-static  (tab voice note ban jayega)");
-        result = { buffer: original, mimetype: 'audio/mpeg', ptt: false };
+        result = { buffer: original, mimetype: getFallbackMime(url), ptt: false };
     }
     voiceCache[songNum] = result;
     return result;
@@ -104,12 +116,12 @@ const getVoiceNote = async (songNum, url) => {
 // Base patterns
 const basePatterns = ["hayasong", "haya", "hsong"];
 
-// Sab patterns generate karo: base, base1, base2, base3, base4...
+// Sab patterns generate karo: base, base1, base2, ... base8
 const patternLoop = [];
 basePatterns.forEach((base) => {
     patternLoop.push(base);           // "hayasong"
     Object.keys(songs).forEach((num) => {
-        patternLoop.push(`${base}${num}`);  // "hayasong1", "hayasong2", "hayasong3", "hayasong4"
+        patternLoop.push(`${base}${num}`);  // "hayasong1", "hayasong2", ... "hayasong8"
     });
 });
 
