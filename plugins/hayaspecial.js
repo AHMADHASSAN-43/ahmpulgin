@@ -20,7 +20,8 @@ const songs = {
     6: "https://files.catbox.moe/y26pp6.m4a",   // Haya Song 6
     7: "https://files.catbox.moe/96l81l.m4a",   // Haya Song 7
     8: "https://files.catbox.moe/8wcrm2.m4a",   // Haya Song 8
-    // 9: "https://...",  // future songs yahan add karo
+    9: "https://files.catbox.moe/g2wjid.mp3",   // Haya Song 9  <-- NEW
+    // 10: "https://...",  // future songs yahan add karo
 };
 
 // --- VOICE NOTE SUPPORT ---
@@ -116,12 +117,12 @@ const getVoiceNote = async (songNum, url) => {
 // Base patterns
 const basePatterns = ["hayasong", "haya", "hsong"];
 
-// Sab patterns generate karo: base, base1, base2, ... base8
+// Sab patterns generate karo: base, base1, base2, ... baseN
 const patternLoop = [];
 basePatterns.forEach((base) => {
     patternLoop.push(base);           // "hayasong"
     Object.keys(songs).forEach((num) => {
-        patternLoop.push(`${base}${num}`);  // "hayasong1", "hayasong2", ... "hayasong8"
+        patternLoop.push(`${base}${num}`);  // "hayasong1", "hayasong2", ... "hayasong9"
     });
 });
 
@@ -135,7 +136,7 @@ patternLoop.forEach((ptrn) => {
     async (conn, mek, m, { from, reply }) => {
         try {
             // Pattern se song number nikaalo
-            // Example: "hayasong1" -> "1" | "hayasong" -> default 1
+            // Example: "hayasong9" -> "9" | "hayasong" -> default 1
             let songNum = null;
 
             for (const base of basePatterns) {
