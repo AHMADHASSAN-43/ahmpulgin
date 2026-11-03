@@ -2,24 +2,41 @@ import { cmd } from '../command.js';
 import axios from 'axios';
 import yts from 'yt-search';
 
+// ====== API SETTINGS (sirf yahan badlo) ======
+const API_URL = process.env.YT_API_URL || 'https://YOUR-NEW-API-URL/api/ytmp3'; // <-- naya URL yahan
+const API_TOKEN = process.env.YT_API_TOKEN || 'Ahmad568868990866';
+const AUTH_MODE = 'query';      // 'query' => ?apikey=TOKEN | 'header' => Authorization: Bearer TOKEN
+const TOKEN_PARAM = 'apikey';   // query mode mein param ka naam (api_key / token bhi ho sakta hai)
+const URL_PARAM = 'url';        // video link ka param naam
+// ============================================
+
+function pickAudioUrl(data) {
+    const r = data?.result ?? data?.data ?? data;
+    const candidates = [
+        r?.audio_download, r?.download_url, r?.downloadUrl, r?.download,
+        r?.audio, r?.url, r?.link, r?.mp3,
+        data?.download_url, data?.url, data?.link
+    ];
+    return candidates.find(v => typeof v === 'string' && /^https?:\/\//i.test(v)) || null;
+}
+
 cmd({
     pattern: "play",
     alias: ["song", "mp3"],
-    desc: "Download YouTube audio via Adeel-Xtech API",
+    desc: "Download YouTube audio",
     category: "download",
     react: "🎶",
     filename: import.meta.url
 }, async (conn, mek, m, { from, q, reply }) => {
+    const react = async (emoji) => {
+        try { await conn.sendMessage(from, { react: { text: emoji, key: mek.key } }); } catch (_) {}
+    };
+
     try {
         const query = q ? q.trim() : "";
+        if (!query) return reply("❌ Please provide a song name or YouTube link!");
 
-        if (!query) {
-            return reply("❌ Please provide a song name or YouTube link!");
-        }
-
-        try {
-            await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
-        } catch (_) {}
+        await react("⏳");
 
         let video;
         const isYT = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(query);
@@ -27,36 +44,32 @@ cmd({
         if (isYT) {
             let videoId = '';
             try {
-                const urlObj = new URL(query);
-                if (urlObj.hostname === 'youtu.be') {
-                    videoId = urlObj.pathname.slice(1);
-                } else {
-                    videoId = urlObj.searchParams.get('v');
-                }
+                const urlObj = new URL(query.startsWith('http') ? query : `https://${query}`);
+                videoId = urlObj.hostname.includes('youtu.be')
+                    ? urlObj.pathname.slice(1)
+                    : urlObj.searchParams.get('v');
             } catch {
                 videoId = query.split('/').pop().split('?')[0];
             }
 
             if (!videoId) {
-                try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+                await react("❌");
                 return reply("❌ Invalid YouTube link");
             }
 
             try {
-                const search = await yts(videoId);
-                if (search && search.videos && search.videos.length) {
-                    video = search.videos[0];
+                const search = await yts({ videoId });
+                if (search?.title) {
+                    video = {
+                        title: search.title,
+                        url: search.url,
+                        thumbnail: search.thumbnail,
+                        timestamp: search.timestamp,
+                        views: search.views,
+                        author: search.author
+                    };
                 }
-            } catch (e) {}
-
-            if (!video) {
-                try {
-                    const search2 = await yts(`https://www.youtube.com/watch?v=${videoId}`);
-                    if (search2 && search2.videos && search2.videos.length) {
-                        video = search2.videos[0];
-                    }
-                } catch (e) {}
-            }
+            } catch (_) {}
 
             if (!video) {
                 video = {
@@ -71,7 +84,7 @@ cmd({
         } else {
             const search = await yts(query);
             if (!search.videos.length) {
-                try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+                await react("❌");
                 return reply("❌ No song results found");
             }
             video = search.videos[0];
@@ -91,27 +104,47 @@ cmd({
             }, { quoted: mek });
         } catch (_) {}
 
+        // ---- API call with token ----
+        const params = { [URL_PARAM]: video.url };
+        const headers = {};
+        if (AUTH_MODE === 'header') {
+            headers['Authorization'] = `Bearer ${API_TOKEN}`;
+            headers['x-api-key'] = API_TOKEN;
+        } else {
+            params[TOKEN_PARAM] = API_TOKEN;
+        }
+
         let data;
+        let httpStatus;
         try {
-            const apiRes = await axios.get('https://adeel-xtech-api.vercel.app/api/ytmp3', {
-                params: { url: video.url },
+            const apiRes = await axios.get(API_URL, {
+                params,
+                headers,
                 timeout: 45000,
                 validateStatus: () => true
             });
             data = apiRes.data;
+            httpStatus = apiRes.status;
         } catch (apiErr) {
-            try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+            await react("❌");
             return reply(`❌ API error: ${apiErr?.message || apiErr}`);
         }
 
-        if (!data?.status || !data?.result?.audio_download) {
-            try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
-            return reply(`❌ ${data?.message || 'Failed to fetch audio from server.'}`);
+        // ---- Response check ----
+        console.log('[play] API status:', httpStatus, 'response:', JSON.stringify(data)?.slice(0, 500));
+
+        if (httpStatus === 401 || httpStatus === 403) {
+            await react("❌");
+            return reply("❌ API token invalid ya expire hai.");
         }
 
-        const res = data.result;
-        const title = (res.title || video.title || 'YouTube Song').toString();
-        const audioUrl = res.audio_download;
+        const audioUrl = pickAudioUrl(data);
+        if (!audioUrl) {
+            await react("❌");
+            return reply(`❌ ${data?.message || data?.error || 'Server se audio link nahi mila.'}`);
+        }
+
+        const title = (data?.result?.title || data?.title || video.title || 'YouTube Song').toString();
 
         let sent = false;
         let lastSendError = null;
@@ -153,18 +186,15 @@ cmd({
         }
 
         if (!sent) {
-            try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+            await react("❌");
             return reply(`❌ Audio send failed: ${lastSendError || 'unknown'}`);
         }
 
-        try {
-            await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
-        } catch (_) {}
+        await react("✅");
 
     } catch (e) {
-        const msg = e?.message || e?.toString?.() || 'Unexpected error';
         console.error('Play Command Error:', e);
-        try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
-        reply(`❌ Error: ${msg}`);
+        await react("❌");
+        reply(`❌ Error: ${e?.message || 'Unexpected error'}`);
     }
 });
