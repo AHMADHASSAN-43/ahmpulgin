@@ -1,139 +1,124 @@
-import { cmd } from '../command.js';
-import axios from 'axios';
-import yts from 'yt-search';
+import { cmd } from "../command.js";
+import yts from "yt-search";
+import axios from "axios";
+import { fileURLToPath } from 'url';
 
-const downloadVideo = async (videoUrl) => {
-    try {
-        const res = await axios.get(
-            `https://adeel-xtech-api.vercel.app/api/ytmp4?url=${encodeURIComponent(videoUrl)}`,
-            { timeout: 60000 }
-        );
-        const url = res.data?.result?.video_download;
-        if (!res.data?.status || !url) throw new Error("No URL");
-        return url;
-    } catch (e) {
-        return null;
-    }
+const __filename = fileURLToPath(import.meta.url);
+
+const API_CONFIG = {
+    VIDEO_API: Buffer.from("aHR0cHM6Ly9hcGkubmV4cmF5LmV1LmNjL2Rvd25sb2FkZXIvdjEveXRtcDQ/dXJsPQ==", "base64").toString()
 };
 
-cmd({
+/**
+ * Normalizes YouTube URLs to a standard format
+ */
+function normalizeYouTubeUrl(url) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/.*[?&]v=)([a-zA-Z0-9_-]{11})/);
+  return match ? `https://youtube.com/watch?v=${match[1]}` : null;
+}
+
+/**
+ * Fetch Video Download
+ */
+async function fetchVideoData(url, quality = '360', retries = 2) {
+  try {
+    const apiUrl = `${API_CONFIG.VIDEO_API}${encodeURIComponent(url)}&resolusi=${quality}`;
+    const { data } = await axios.get(apiUrl, { timeout: 20000 });
+    
+    if (data?.status && data?.result?.url) {
+      return {
+        video_url: data.result.url,
+        title: data.result.title || "YouTube Video",
+        quality: quality
+      };
+    }
+    throw new Error("API failed to return download link.");
+  } catch (error) {
+    if (retries > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return fetchVideoData(url, quality, retries - 1);
+    }
+    return null;
+  }
+}
+
+// --- VIDEO COMMAND ---
+
+cmd(
+  {
     pattern: "video",
-    alias: ["mp4"],
-    desc: "Download video by name or link",
+    alias: ["ytmp4", "vdl"],
+    react: "🎥",
+    desc: "Search and download high-quality videos from YouTube.",
     category: "download",
-    react: "🎬",
-    filename: import.meta.url
-}, async (sock, message, m, { q }) => {
-
-    const query = q ? q.trim() : "";
-
-    if (!query) {
-        return await sock.sendMessage(message.chat, {
-            text: "❌ Please provide a video name or YouTube link"
-        }, { quoted: message });
-    }
-
+    filename: __filename,
+  },
+  async (conn, mek, m, { from, q, reply, prefix, command }) => {
     try {
-        let video;
-        const isYT = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(query);
+      if (!q) return reply(`🎥 *Video Downloader*\n\nUsage: \`${prefix + command} <name or link>\`\nExample: \`${prefix + command} perfect ed sheeran\``);
 
-        if (isYT) {
-            let videoId = '';
-            try {
-                const urlObj = new URL(query);
-                if (urlObj.hostname === 'youtu.be') {
-                    videoId = urlObj.pathname.slice(1);
-                } else {
-                    videoId = urlObj.searchParams.get('v');
-                }
-            } catch {
-                videoId = query.split('/').pop().split('?')[0];
-            }
+      await conn.sendMessage(from, { react: { text: "🔍", key: mek.key } });
 
-            if (!videoId) {
-                return sock.sendMessage(message.chat, {
-                    text: "❌ Invalid YouTube link"
-                }, { quoted: message });
-            }
+      // Step 1: Search for the video
+      const url = normalizeYouTubeUrl(q);
+      let ytdata;
 
-            try {
-                const search = await yts(videoId);
-                if (search && search.videos && search.videos.length) {
-                    video = search.videos[0];
-                }
-            } catch (e) {}
+      if (url) {
+        const searchResults = await yts({ videoId: q.split('v=')[1]?.split('&')[0] || q.split('/').pop() });
+        ytdata = searchResults;
+      } else {
+        const searchResults = await yts(q);
+        if (!searchResults.videos.length) return reply("❌ No videos found for your query!");
+        ytdata = searchResults.videos[0];
+      }
 
-            if (!video) {
-                try {
-                    const search2 = await yts(`https://www.youtube.com/watch?v=${videoId}`);
-                    if (search2 && search2.videos && search2.videos.length) {
-                        video = search2.videos[0];
-                    }
-                } catch (e) {}
-            }
+      // Step 2: Send info message
+      const infoText = `
+🎥 *YT VIDEO DOWNLOADER* 🎥
 
-            if (!video) {
-                video = {
-                    title: 'Unknown Title',
-                    url: `https://www.youtube.com/watch?v=${videoId}`,
-                    thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-                    timestamp: 'N/A',
-                    views: 0,
-                    author: { name: 'Unknown' }
-                };
-            }
+📌 *Title:* ${ytdata.title}
+🎬 *Channel:* ${ytdata.author?.name || 'Unknown'}
+⏱️ *Duration:* ${ytdata.timestamp}
+👁️ *Views:* ${ytdata.views.toLocaleString()}
 
-        } else {
-            const search = await yts(query);
-            if (!search.videos.length) {
-                return sock.sendMessage(message.chat, {
-                    text: "❌ No video results found"
-                }, { quoted: message });
-            }
-            video = search.videos[0];
-        }
+_📥 Processing your video file, please wait..._
 
-        const captionText =
-            `*${video.title}*\n\n` +
-            `🎥 *Channel:* ${video.author.name}\n` +
-            `👁️ *Views:* ${(video.views || 0).toLocaleString()}\n` +
-            `⏳ *Duration:* ${video.timestamp}\n\n` +
-            `> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ AHMAD MD ⚡*`;
+> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ AHMAD`;
 
-        await sock.sendMessage(message.chat, {
-            image: { url: video.thumbnail },
-            caption: captionText
-        }, { quoted: message });
+      await conn.sendMessage(from, { image: { url: ytdata.thumbnail || ytdata.image }, caption: infoText }, { quoted: mek });
+      await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
 
-        await sock.sendMessage(message.chat, {
-            react: { text: "⏳", key: message.key }
-        });
+      // Step 3: Fetch download link from API (try different qualities)
+      let qualities = ['720', '480', '360', '144'];
+      let dlData = null;
+      
+      for (const quality of qualities) {
+        dlData = await fetchVideoData(ytdata.url, quality);
+        if (dlData) break;
+      }
 
-        const downUrl = await downloadVideo(video.url);
+      if (!dlData || !dlData.video_url) {
+        await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+        return reply("❌ Download link could not be generated. Please try again later.");
+      }
 
-        if (!downUrl) {
-            await sock.sendMessage(message.chat, {
-                react: { text: "❌", key: message.key }
-            });
-            return sock.sendMessage(message.chat, {
-                text: "❌ All download servers are currently unavailable. Please try again later."
-            }, { quoted: message });
-        }
+      // Step 4: Send the Video file
+      await conn.sendMessage(
+        from,
+        {
+          video: { url: dlData.video_url },
+          mimetype: "video/mp4",
+          caption: `✅ *${dlData.title}*\n📹 Quality: ${dlData.quality}p\n\n*🚀 Powered by Ahmad*`
+        },
+        { quoted: mek }
+      );
 
-        await sock.sendMessage(message.chat, {
-            video: { url: downUrl },
-            mimetype: "video/mp4",
-            caption: `*${video.title}*\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ AHMAD MD ⚡*`
-        }, { quoted: message });
+      await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
 
-        await sock.sendMessage(message.chat, {
-            react: { text: "✅", key: message.key }
-        });
-
-    } catch (err) {
-        console.log("Video Command Error:", err);
-        await sock.sendMessage(message.chat, {
-            text: "❌ An unexpected error occurred while processing your request."
-        }, { quoted: message });
+    } catch (e) {
+      console.error("Video DL Error:", e);
+      await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+      reply(`⚠️ *Error:* ${e.message || "Something went wrong."}\n\n*_Powered by Ahmad_*`);
     }
-});
+  }
+);
