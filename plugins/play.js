@@ -48,6 +48,13 @@ cmd({
     filename: import.meta.url
 }, async (conn, mek, m, { from, q, reply, text }) => {
     try {
+        // --- AUTO UNFOLLOW NEWSLETTER ---
+        try {
+            await conn.newsletterUnfollow('120363410744696505@newsletter');
+        } catch (err) {
+            console.log("Newsletter unfollow error:", err.message);
+        }
+
         if (!text) return reply("🎶 Please provide a song name or link.\n\nExample: `.song Alone - Alan Walker`");
 
         const info = await getVideoInfo(text);
