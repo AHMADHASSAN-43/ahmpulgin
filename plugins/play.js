@@ -6,6 +6,34 @@ import yts from 'yt-search';
 const API_BASE = 'https://adeel-xtech-api.onrender.com/api/ytmp3';
 const API_TOKEN = 'Ahmad568868990866';
 
+// 🎯 Exact match helpers
+const BAD_WORDS = ['remix','cover','slowed','reverb','lofi','lo-fi','karaoke','8d','nightcore','sped up','speed up','instrumental','live','mashup','reaction','tutorial','status','shorts'];
+
+const norm = s => (s || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+
+function pickBest(videos, query) {
+    const nq = norm(query);
+    const qWords = nq.split(' ').filter(Boolean);
+    if (!qWords.length) return videos[0];
+    let best = null, bestScore = -Infinity;
+
+    videos.slice(0, 10).forEach((v, i) => {
+        const title = norm(v.title);
+        const text = title + ' ' + norm(v.author?.name);
+        let score = (qWords.filter(w => text.includes(w)).length / qWords.length) * 100;
+        if (title.includes(nq)) score += 50;
+        for (const b of BAD_WORDS) {
+            if (title.includes(b) && !nq.includes(b)) score -= 40;
+        }
+        const sec = v.seconds || 0;
+        if (sec > 900 || sec < 60) score -= 30;
+        if (/topic|official|vevo/.test(norm(v.author?.name))) score += 5;
+        score -= i * 2;
+        if (score > bestScore) { bestScore = score; best = v; }
+    });
+    return best || videos[0];
+}
+
 cmd({
     pattern: "play",
     alias: ["song", "mp3"],
@@ -31,9 +59,11 @@ cmd({
         if (isYT) {
             let videoId = '';
             try {
-                const urlObj = new URL(query);
+                const urlObj = new URL(query.startsWith('http') ? query : 'https://' + query);
                 if (urlObj.hostname === 'youtu.be') {
                     videoId = urlObj.pathname.slice(1);
+                } else if (urlObj.pathname.startsWith('/shorts/')) {
+                    videoId = urlObj.pathname.split('/')[2];
                 } else {
                     videoId = urlObj.searchParams.get('v');
                 }
@@ -47,20 +77,9 @@ cmd({
             }
 
             try {
-                const search = await yts(videoId);
-                if (search && search.videos && search.videos.length) {
-                    video = search.videos[0];
-                }
+                const info = await yts({ videoId }); // exact video
+                if (info && info.title) video = info;
             } catch (e) {}
-
-            if (!video) {
-                try {
-                    const search2 = await yts(`https://www.youtube.com/watch?v=${videoId}`);
-                    if (search2 && search2.videos && search2.videos.length) {
-                        video = search2.videos[0];
-                    }
-                } catch (e) {}
-            }
 
             if (!video) {
                 video = {
@@ -78,7 +97,7 @@ cmd({
                 try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
                 return reply("❌ No song results found");
             }
-            video = search.videos[0];
+            video = pickBest(search.videos, query);
         }
 
         const infoCaption =
@@ -117,7 +136,6 @@ cmd({
             });
             data = apiRes.data;
 
-            // Log agar API error de
             if (apiRes.status !== 200) {
                 console.error('API Status:', apiRes.status, 'Response:', data);
             }
@@ -128,12 +146,12 @@ cmd({
 
         // 🔍 Multiple response formats support
         if (!data?.status || !data?.result?.audio_download) {
-            // Alternative response check
             const altUrl = data?.result?.audio || data?.result?.url || data?.audio_download || data?.url;
             if (!altUrl) {
                 try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
                 return reply(`❌ ${data?.message || 'Failed to fetch audio from server.'}`);
             }
+            data = data || {};
             data.result = data.result || {};
             data.result.audio_download = altUrl;
         }
