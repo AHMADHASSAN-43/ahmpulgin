@@ -1,16 +1,19 @@
-import { fileURLToPath } from 'url';
 import { cmd } from '../command.js';
 import axios from 'axios';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const API_URL = 'https://adeel-xtech-api.vercel.app/api/gptv2';
+
+const API_URL = 'https://adeel-xtech-api.onrender.com/api/gptv2';
 const TIMEOUT = 15000;
+const API_TOKEN = 'Ahmad568868990866';
 
 async function askAI(q, reply, usage) {
     if (!q) return reply(usage);
     try {
         const res = await axios.get(API_URL, {
             params: { q },
+            headers: { 'x-api-token': API_TOKEN },
             timeout: TIMEOUT
         });
         if (res.data && res.data.status && res.data.result) {
@@ -736,7 +739,7 @@ cmd({
 });
 
 cmd({
-    pattern: "ahmed",
+    pattern: "palm2",
     desc: "Chat with PaLM 2 AI",
     category: "ai",
     react: "🤖",
@@ -765,4 +768,25 @@ cmd({
 }, async (conn, mek, m, { q, reply }) => {
     const prompt = q ? ("Check grammar and spelling, then give corrected text: " + q) : q;
     await askAI(prompt, reply, "❌ *Usage:* .grammar Your text to check");
+});
+
+cmd({
+    pattern: "ai",
+    desc: "Chat with AI",
+    category: "ai",
+    react: "🤖",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    await askAI(q, reply, "❌ *Usage:* .ai Your question");
+});
+
+cmd({
+    pattern: "adeel",
+    desc: "Chat with Adeel AI",
+    category: "ai",
+    react: "👑",
+    filename: __filename
+}, async (conn, mek, m, { q, reply }) => {
+    const prompt = q ? ("You are Adeel AI, a smart and helpful assistant. Answer clearly: " + q) : q;
+    await askAI(prompt, reply, "❌ *Usage:* .adeel Your question");
 });
