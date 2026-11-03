@@ -6,6 +6,39 @@ import yts from 'yt-search';
 const API_BASE = 'https://adeel-xtech-api.onrender.com/api/ytmp3';
 const API_TOKEN = 'Ahmad568868990866';
 
+async function getVideoInfo(text) {
+    const { default: yts } = await import('yt-search');
+    let url = text;
+    let vid = null;
+    if (text.startsWith('http://') || text.startsWith('https://')) {
+        const videoId = getVideoId(text);
+        if (!videoId) return { error: "❌ Invalid YouTube URL!" };
+        vid = await yts({ videoId: videoId });
+    } else {
+        const search = await yts(text);
+        if (!search || !search.videos || !search.videos.length) return { error: "❌ No results found!" };
+        vid = search.videos[0];
+        url = vid.url;
+    }
+    if (!vid) return { error: "❌ Failed to fetch details!" };
+    return { vid, url };
+}
+
+function getVideoId(url) {
+    if (!url || typeof url !== 'string') return null;
+    const patterns = [
+        /(?:youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]{11})/,
+        /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+        /(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+        /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/
+    ];
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) return match[1];
+    }
+    return null;
+}
+
 cmd({
     pattern: "play",
     alias: ["song", "mp3"],
@@ -13,73 +46,19 @@ cmd({
     category: "download",
     react: "🎶",
     filename: import.meta.url
-}, async (conn, mek, m, { from, q, reply }) => {
+}, async (conn, mek, m, { from, q, reply, text }) => {
     try {
-        const query = q ? q.trim() : "";
+        if (!text) return reply("🎶 Please provide a song name or link.\n\nExample: `.song Alone - Alan Walker`");
 
-        if (!query) {
-            return reply("❌ Please provide a song name or YouTube link!");
-        }
+        const info = await getVideoInfo(text);
+        if (info.error) return reply(info.error);
+        const { vid, url } = info;
 
         try {
             await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
         } catch (_) {}
 
-        let video;
-        const isYT = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(query);
-
-        if (isYT) {
-            let videoId = '';
-            try {
-                const urlObj = new URL(query);
-                if (urlObj.hostname === 'youtu.be') {
-                    videoId = urlObj.pathname.slice(1);
-                } else {
-                    videoId = urlObj.searchParams.get('v');
-                }
-            } catch {
-                videoId = query.split('/').pop().split('?')[0];
-            }
-
-            if (!videoId) {
-                try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
-                return reply("❌ Invalid YouTube link");
-            }
-
-            try {
-                const search = await yts(videoId);
-                if (search && search.videos && search.videos.length) {
-                    video = search.videos[0];
-                }
-            } catch (e) {}
-
-            if (!video) {
-                try {
-                    const search2 = await yts(`https://www.youtube.com/watch?v=${videoId}`);
-                    if (search2 && search2.videos && search2.videos.length) {
-                        video = search2.videos[0];
-                    }
-                } catch (e) {}
-            }
-
-            if (!video) {
-                video = {
-                    title: 'Unknown Title',
-                    url: `https://www.youtube.com/watch?v=${videoId}`,
-                    thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-                    timestamp: 'N/A',
-                    views: 0,
-                    author: { name: 'Unknown' }
-                };
-            }
-        } else {
-            const search = await yts(query);
-            if (!search.videos.length) {
-                try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
-                return reply("❌ No song results found");
-            }
-            video = search.videos[0];
-        }
+        const video = vid;
 
         const infoCaption =
 `╭━━━〔 🎧 𝗔𝗨𝗗𝗜𝗢 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗥 🎧 〕━━━╮
@@ -103,10 +82,9 @@ cmd({
 
         let data;
         try {
-            // 🔥 New API with token
             const apiRes = await axios.get(API_BASE, {
                 params: {
-                    url: video.url,
+                    url: url,
                     token: API_TOKEN
                 },
                 timeout: 60000,
@@ -117,7 +95,6 @@ cmd({
             });
             data = apiRes.data;
 
-            // Log agar API error de
             if (apiRes.status !== 200) {
                 console.error('API Status:', apiRes.status, 'Response:', data);
             }
@@ -126,9 +103,7 @@ cmd({
             return reply(`❌ API error: ${apiErr?.message || apiErr}`);
         }
 
-        // 🔍 Multiple response formats support
         if (!data?.status || !data?.result?.audio_download) {
-            // Alternative response check
             const altUrl = data?.result?.audio || data?.result?.url || data?.audio_download || data?.url;
             if (!altUrl) {
                 try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
@@ -145,7 +120,6 @@ cmd({
         let sent = false;
         let lastSendError = null;
 
-        // Try buffer first
         try {
             const file = await axios.get(audioUrl, {
                 responseType: 'arraybuffer',
@@ -169,7 +143,6 @@ cmd({
             lastSendError = e?.message || String(e);
         }
 
-        // Fallback: direct URL
         if (!sent) {
             try {
                 await conn.sendMessage(from, {
