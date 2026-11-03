@@ -1,131 +1,464 @@
+// drama.js - ESM Version
+// Powered by Ahmed - YOUTUBE VIDEO DOWNLOADER
+
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import { cmd } from '../command.js';
-import axios from 'axios';
 import yts from 'yt-search';
+import axios from 'axios';
 
-const AXIOS_DEFAULTS = {
-    timeout: 60000,
-    headers: { 'User-Agent': 'Mozilla/5.0' }
-};
+const __filename = fileURLToPath(import.meta.url);
+const require = createRequire(import.meta.url);
 
-async function getDownloadLink(url) {
+let ytdl = null;
+
+try {
+    ytdl = require('@distube/ytdl-core');
+} catch {
     try {
-        const res = await axios.get(
-            `https://adeel-xtech-api.vercel.app/api/ytmp4?url=${encodeURIComponent(url)}`,
-            AXIOS_DEFAULTS
-        );
-        if (res.data?.status === true && res.data?.result?.video_download) {
-            return res.data.result.video_download;
-        }
-        console.log("𝙉𝘼𝙄𝙕𝙄 𝙈𝘿 API returned unexpected shape:", JSON.stringify(res.data));
-    } catch (e) {
-        console.log("𝙉𝘼𝙄𝙕𝙄 𝙈𝘿 API Error:", e.message);
+        ytdl = require('ytdl-core');
+    } catch {
+        ytdl = null;
     }
-
-    return null;
 }
 
-cmd({
-    pattern: "drama",
-    alias: ["darama"],
-    desc: "Download YouTube dramas only (≥15 min) by name",
-    category: "download",
-    react: "🎬",
-    filename: import.meta.url
-}, async (sock, message, m, { q, reply }) => {
-    try {
-        if (!q) return reply("⚠️ Please provide a Drama Name or Video Title!");
+const MAX_FILE_SIZE = 95 * 1024 * 1024;
 
-        if (q.includes("youtube.com/") || q.includes("youtu.be/"))
-            return reply("❌ Links are not allowed. Please type the name only!");
+function normalizeYouTubeUrl(url) {
+    const match = url.match(
+        /(?:youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/.*[?&]v=)([a-zA-Z0-9_-]{11})/
+    );
 
-        const search = await yts(q);
-        const video = search.videos.find(v => v.seconds >= 900);
-        if (!video) return reply("❌ No suitable drama found (≥15 min)!");
+    return match
+        ? `https://youtube.com/watch?v=${match[1]}`
+        : null;
+}
 
-        const customName = "> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*";
-        const videoTitle = video.title;
+const AXIOS_CONFIG = {
+    timeout: 30000,
+    headers: {
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*'
+    }
+};
 
-        const captionBox = `╭━〔 *YT DOWNLOADER* 〕━┈⊷
-┃ 🎬 *TITLE:* ${videoTitle}
-┃ ⏱️ *DURATION:* ${video.timestamp}
-┃ 👁️ *VIEWS:* ${video.views.toLocaleString()}
-┃ 📺 *CHANNEL:* ${video.author.name}
-╰━━━━━━━━━━━━━━━━┈⊷
+function extractDownloadUrl(data) {
+    if (!data) return null;
 
-*ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴡɪᴛʜ ᴀ ɴᴜᴍʙᴇʀ*
-(1) 📂 *ᴅᴏᴄᴜᴍᴇɴᴛ*
-(2) 🎥 *ᴠɪᴅᴇᴏ*
+    const result = data.result || data.data || data;
 
-${customName}`;
+    if (typeof result === 'string' && result.startsWith('http')) {
+        return result;
+    }
 
-        const sentMsg = await sock.sendMessage(message.chat, {
-            image: { url: video.thumbnail },
-            caption: captionBox
-        }, { quoted: message });
+    return (
+        result?.mp4 ||
+        result?.download_url ||
+        result?.download ||
+        result?.url ||
+        result?.link ||
+        result?.video ||
+        result?.video_url ||
+        data?.download_url ||
+        data?.url ||
+        null
+    );
+}
 
-        const listener = async (chatUpdate) => {
+// 1. YTV3 API
+async function ytv3API(url) {
+    const apiUrl =
+        `https://xjawadtech.vercel.app/ytv3?url=${encodeURIComponent(url)}&key=erfanxjawadi`;
+
+    const response = await axios.get(apiUrl, AXIOS_CONFIG);
+    const data = response.data;
+
+    if (!data?.status || !data?.download?.url) {
+        throw new Error('YTV3: video URL not found');
+    }
+
+    return {
+        video_url: data.download.url,
+        title: data.download.title || 'YouTube Video'
+    };
+}
+
+// 2. Dark Shan API
+async function darkShanAPI(url) {
+    const apiUrl =
+        `https://api-dark-shan-yt.koyeb.app/download/ytmp4?url=${encodeURIComponent(url)}&apikey=72209ca3742e5a36`;
+
+    const response = await axios.get(apiUrl, AXIOS_CONFIG);
+    const data = response.data;
+
+    const videoUrl = extractDownloadUrl(data);
+
+    if (!videoUrl) {
+        throw new Error('Dark Shan: video URL not found');
+    }
+
+    const result = data.result || data.data || {};
+
+    return {
+        video_url: videoUrl,
+        title: result?.title || data?.title || 'YouTube Video'
+    };
+}
+
+// 3. CypherX API
+async function cypherXAPI(url) {
+    const apiUrl =
+        `https://media.cypherxbot.space/download/youtube/video?url=${encodeURIComponent(url)}`;
+
+    const response = await axios.get(apiUrl, AXIOS_CONFIG);
+    const data = response.data;
+
+    if (!data?.success || !data?.result?.download_url) {
+        throw new Error('CypherX: video URL not found');
+    }
+
+    return {
+        video_url: data.result.download_url,
+        title: data.result.title || 'YouTube Video'
+    };
+}
+
+// 4. PrinceTech API
+async function princeTechAPI(url) {
+    const apiUrl =
+        `https://api.princetechn.com/api/download/ytvideo?url=${encodeURIComponent(url)}&apikey=prince`;
+
+    const response = await axios.get(apiUrl, AXIOS_CONFIG);
+    const data = response.data;
+
+    if (!data?.success || !data?.result?.download_url) {
+        throw new Error('PrinceTech: video URL not found');
+    }
+
+    return {
+        video_url: data.result.download_url,
+        title: data.result.title || 'YouTube Video'
+    };
+}
+
+// 5. Keith / David APIs
+async function keithAPI(url) {
+    const apis = [
+        `https://apiskeith.top/download/video?url=${encodeURIComponent(url)}`,
+        `https://apiskeith.top/download/ytmp4?url=${encodeURIComponent(url)}`,
+        `https://apis.davidcyril.name.ng/download/ytmp4?url=${encodeURIComponent(url)}`,
+        `https://apis.davidcyril.name.ng/youtube/mp4?url=${encodeURIComponent(url)}`
+    ];
+
+    let lastError;
+
+    for (const apiUrl of apis) {
+        try {
+            const response = await axios.get(apiUrl, AXIOS_CONFIG);
+            const data = response.data;
+
+            const videoUrl = extractDownloadUrl(data);
+
+            if (!videoUrl) continue;
+
+            const result = data.result || data.data || {};
+
+            return {
+                video_url: videoUrl,
+                title: result?.title || data?.title || 'YouTube Video'
+            };
+
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    throw lastError || new Error('Keith/David APIs failed');
+}
+
+// 6. Direct YouTube fallback
+async function directYouTubeAPI(url) {
+    if (!ytdl) {
+        throw new Error('ytdl-core not installed');
+    }
+
+    const info = await ytdl.getInfo(url);
+
+    const format =
+        ytdl.chooseFormat(info.formats, {
+            quality: 'highestvideo',
+            filter: 'videoandaudio'
+        }) ||
+        ytdl.chooseFormat(info.formats, {
+            quality: 'highest',
+            filter: 'videoandaudio'
+        });
+
+    if (!format) {
+        throw new Error('No YouTube video format found');
+    }
+
+    return {
+        video_url: format.url,
+        title: info.videoDetails?.title || 'YouTube Video'
+    };
+}
+
+// Download video
+async function downloadVideo(videoUrl) {
+    const response = await axios.get(videoUrl, {
+        responseType: 'arraybuffer',
+        timeout: 120000,
+        maxContentLength: MAX_FILE_SIZE,
+        maxBodyLength: MAX_FILE_SIZE
+    });
+
+    const buffer = Buffer.from(response.data);
+
+    if (!buffer.length) {
+        throw new Error('Empty video file');
+    }
+
+    if (buffer.length > MAX_FILE_SIZE) {
+        throw new Error('Video file too large');
+    }
+
+    return buffer;
+}
+
+// Multiple API fallback
+async function fetchDownloadData(url) {
+
+    const apis = [
+        {
+            name: 'YTV3',
+            fn: () => ytv3API(url)
+        },
+        {
+            name: 'Dark Shan',
+            fn: () => darkShanAPI(url)
+        },
+        {
+            name: 'CypherX',
+            fn: () => cypherXAPI(url)
+        },
+        {
+            name: 'PrinceTech',
+            fn: () => princeTechAPI(url)
+        },
+        {
+            name: 'Keith / David',
+            fn: () => keithAPI(url)
+        },
+        {
+            name: 'Direct YouTube',
+            fn: () => directYouTubeAPI(url)
+        }
+    ];
+
+    let lastError;
+
+    for (const api of apis) {
+
+        try {
+
+            console.log(`[VIDEO] Trying ${api.name}...`);
+
+            const data = await api.fn();
+
+            if (data?.video_url) {
+                console.log(`[VIDEO] ✅ ${api.name} resolved video`);
+                return data;
+            }
+
+        } catch (error) {
+
+            lastError = error;
+
+            console.log(
+                `[VIDEO] ❌ ${api.name} failed:`,
+                error?.message || error
+            );
+        }
+    }
+
+    throw lastError || new Error('All download APIs failed');
+}
+
+// MAIN COMMAND
+cmd(
+    {
+        pattern: "drama",
+        alias: ["ytmp4", "vdl"],
+        react: "🔁",
+        desc: "YouTube Video Downloader",
+        category: "download",
+        filename: __filename
+    },
+
+    async (conn, mek, m, { from, q, reply, prefix, command }) => {
+
+        try {
+
+            if (!q) {
+                return reply(
+                    `🎥 *Usage:* ${prefix + command} video name or link`
+                );
+            }
+
+            await conn.sendMessage(from, {
+                react: {
+                    text: "🔍",
+                    key: mek.key
+                }
+            });
+
+            // SEARCH VIDEO
+            const normalizedUrl = normalizeYouTubeUrl(q);
+            let ytdata;
+
+            if (normalizedUrl) {
+
+                const videoId = normalizedUrl.split("v=")[1];
+
+                try {
+                    ytdata = await yts({ videoId });
+                } catch {
+                    ytdata = {
+                        url: normalizedUrl,
+                        title: "YouTube Video",
+                        timestamp: "Unknown"
+                    };
+                }
+
+            } else {
+
+                const searchResults = await yts(q);
+
+                if (!searchResults.videos?.length) {
+                    return reply("❌ No video found!");
+                }
+
+                ytdata = searchResults.videos[0];
+            }
+
+            if (!ytdata) {
+                return reply("❌ No video found!");
+            }
+
+            const caption = `╭━━━〔 🎬 𝗩𝗜𝗗𝗘𝗢 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗥 🎬 〕━━━╮
+│
+│ 🎵 *Title*    : ${ytdata.title}
+│ 📺 *Channel*  : ${ytdata.author?.name || 'Unknown'}
+│ ⏱️ *Duration* : ${ytdata.timestamp || 'Unknown'}
+│ 📥 *Status*   : Downloading... ⏳
+│
+╰━━━━━━━━━━━━━━━━━━━━━━━━╯
+
+💖 ᴘᴏᴡᴇʀᴇᴅ ʙʏ AHMED 💖`;
+
+            await conn.sendMessage(from, {
+                image: {
+                    url: ytdata.thumbnail || ytdata.image
+                },
+                caption
+            }, {
+                quoted: mek
+            });
+
+            await conn.sendMessage(from, {
+                react: {
+                    text: "⏳",
+                    key: mek.key
+                }
+            });
+
+            // GET DOWNLOAD LINK
+            let dlData;
+
             try {
-                const msg = chatUpdate.messages[0];
-                if (!msg.message?.extendedTextMessage) return;
 
-                const selectedText = msg.message.extendedTextMessage.text.trim();
-                const context = msg.message.extendedTextMessage.contextInfo;
-                const isReplyToBot = context && context.stanzaId === sentMsg.key.id;
-                if (!isReplyToBot) return;
+                dlData = await fetchDownloadData(
+                    normalizedUrl || ytdata.url
+                );
 
-                if (!["1", "2"].includes(selectedText)) return;
+            } catch (error) {
 
-                // Remove listener immediately so it only runs once
-                sock.ev.off("messages.upsert", listener);
+                console.log(
+                    "[VIDEO] ALL APIs FAILED:",
+                    error?.message || error
+                );
 
-                await sock.sendMessage(message.chat, {
-                    react: { text: "⏳", key: msg.key }
-                });
+                return reply(
+                    "❌ All video download sources are currently unavailable. Please try again."
+                );
+            }
 
-                const dlUrl = await getDownloadLink(video.url);
-                if (!dlUrl) {
-                    await sock.sendMessage(message.chat, {
-                        react: { text: "❌", key: msg.key }
-                    });
-                    return sock.sendMessage(message.chat, {
-                        text: "❌ Download server is currently unavailable. Please try again later."
-                    }, { quoted: msg });
-                }
+            if (!dlData?.video_url) {
+                return reply("❌ Video link not found or expired!");
+            }
 
-                if (selectedText === "1") {
-                    await sock.sendMessage(message.chat, {
-                        document: { url: dlUrl },
-                        mimetype: "video/mp4",
-                        fileName: `${videoTitle}.mp4`,
-                        caption: `*${videoTitle}*`
-                    }, { quoted: msg });
-                } else if (selectedText === "2") {
-                    await sock.sendMessage(message.chat, {
-                        video: { url: dlUrl },
-                        mimetype: "video/mp4",
-                        caption: `*${videoTitle}*\n\n${customName}`
-                    }, { quoted: msg });
-                }
+            // DOWNLOAD VIDEO
+            let videoBuffer;
 
-                await sock.sendMessage(message.chat, {
-                    react: { text: "✅", key: msg.key }
-                });
+            try {
+
+                videoBuffer = await downloadVideo(
+                    dlData.video_url
+                );
 
             } catch (err) {
-                console.error("Drama listener error:", err);
-                try {
-                    await sock.sendMessage(message.chat, {
-                        text: "❌ Failed to send the file. Please try again."
-                    });
-                } catch (_) {}
+
+                console.log(
+                    "VIDEO DOWNLOAD ERROR:",
+                    err?.message || err
+                );
+
+                if (/large|size/i.test(err?.message || "")) {
+                    return reply(
+                        "📦 Video is too large to send on WhatsApp."
+                    );
+                }
+
+                return reply(
+                    "❌ Video download failed. The download link may have expired."
+                );
             }
-        };
 
-        sock.ev.on("messages.upsert", listener);
-        setTimeout(() => sock.ev.off("messages.upsert", listener), 120000);
+            // SEND VIDEO
+            await conn.sendMessage(from, {
+                video: videoBuffer,
+                mimetype: "video/mp4",
+                caption: `🎬 *${dlData.title || ytdata.title}*
 
-    } catch (e) {
-        console.error(e);
-        reply("❌ System error occurred.");
+💖 ᴘᴏᴡᴇʀᴇᴅ ʙʏ AHMED 💖`
+            }, {
+                quoted: mek
+            });
+
+            await conn.sendMessage(from, {
+                react: {
+                    text: "✅",
+                    key: mek.key
+                }
+            });
+
+        } catch (e) {
+
+            console.log(
+                "DRAMA COMMAND ERROR:",
+                e
+            );
+
+            await conn.sendMessage(from, {
+                react: {
+                    text: "❌",
+                    key: mek.key
+                }
+            });
+
+            reply("⚠️ Something went wrong!");
+        }
     }
-});
+);
