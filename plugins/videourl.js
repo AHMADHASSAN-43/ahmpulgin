@@ -1,4 +1,4 @@
-// AHMAD MD - ESM Version
+// Powered by Ahmad - ESM Version
 import { cmd } from '../command.js';
 import axios from 'axios';
 import FormData from 'form-data';
@@ -49,11 +49,11 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
 
-    await reply(`✅ *Video Successfully Uploaded*\n\n🔗 URL: ${videoUrl}`);
+    await reply(`✅ *Video Successfully Uploaded*\n\n🔗 URL: ${videoUrl}\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ AHMAD*`);
 
   } catch (error) {
     console.error("Videourl error:", error);
     await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-    await reply(`❌ Error: ${error.message || error}`);
+    await reply(`❌ *Error:* ${error.message || error}\n\n*_Powered by Ahmad_*`);
   }
 });
