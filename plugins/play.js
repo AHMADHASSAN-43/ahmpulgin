@@ -2,110 +2,9 @@ import { cmd } from '../command.js';
 import axios from 'axios';
 import yts from 'yt-search';
 
-// ---------- Search helpers ----------
-
-const tokenize = (s = '') =>
-    s.toLowerCase()
-        .replace(/[^\p{L}\p{N}\s]/gu, ' ')
-        .split(/\s+/)
-        .filter(Boolean);
-
-const BAD_WORDS = ['live', 'cover', 'remix', 'reaction', 'slowed', 'reverb', 'sped', 'nightcore', 'karaoke', '8d', 'instrumental', 'shorts', 'status'];
-const GOOD_WORDS = ['official', 'audio', 'lyrical', 'lyrics', 'song'];
-
-function extractVideoId(input) {
-    const m = input.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/i);
-    return m ? m[1] : null;
-}
-
-function scoreVideo(video, qTokens, index) {
-    const titleTokens = tokenize(video.title);
-    const authorTokens = tokenize(video.author?.name || '');
-    const qSet = new Set(qTokens);
-
-    let score = 0;
-
-    // How many query words appear in the title / channel
-    let titleHits = 0;
-    let authorHits = 0;
-    for (const t of qTokens) {
-        if (titleTokens.includes(t)) titleHits++;
-        else if (authorTokens.includes(t)) authorHits++;
-    }
-    score += (titleHits / qTokens.length) * 10;
-    score += (authorHits / qTokens.length) * 4;
-
-    // Penalise unwanted versions unless user asked for them
-    for (const w of BAD_WORDS) {
-        if (titleTokens.includes(w) && !qSet.has(w)) score -= 5;
-    }
-
-    // Small bonus for official / audio versions
-    for (const w of GOOD_WORDS) {
-        if (titleTokens.includes(w)) score += 0.7;
-    }
-
-    // Duration: avoid live (0 sec) and very long videos
-    const secs = video.seconds || 0;
-    if (secs === 0) score -= 20;
-    else if (secs > 1800) score -= 8;
-    else if (secs > 900) score -= 3;
-    else if (secs < 45) score -= 4;
-
-    // Popularity bonus (small)
-    score += Math.log10((video.views || 0) + 1) * 0.3;
-
-    // Keep YouTube's own relevance order as a light tie-breaker
-    score -= index * 0.15;
-
-    return score;
-}
-
-function pickBestVideo(videos, query) {
-    const qTokens = tokenize(query);
-    if (!qTokens.length) return videos[0];
-
-    const candidates = videos.slice(0, 10);
-    let best = candidates[0];
-    let bestScore = -Infinity;
-
-    candidates.forEach((v, i) => {
-        const s = scoreVideo(v, qTokens, i);
-        if (s > bestScore) {
-            bestScore = s;
-            best = v;
-        }
-    });
-    return best;
-}
-
-async function getVideoById(videoId) {
-    // Exact lookup by id (much more accurate than text search)
-    try {
-        const v = await yts({ videoId });
-        if (v && v.title) {
-            return {
-                title: v.title,
-                url: v.url || `https://www.youtube.com/watch?v=${videoId}`,
-                thumbnail: v.thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-                timestamp: v.timestamp || 'N/A',
-                views: v.views || 0,
-                author: v.author || { name: 'Unknown' }
-            };
-        }
-    } catch (_) {}
-
-    return {
-        title: 'Unknown Title',
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-        thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-        timestamp: 'N/A',
-        views: 0,
-        author: { name: 'Unknown' }
-    };
-}
-
-// ---------- Command ----------
+// 🔑 API Config (Adeel-Xtech API with token)
+const API_BASE = 'https://adeel-xtech-api.onrender.com/api/ytmp3';
+const API_TOKEN = 'Ahmad568868990866';
 
 cmd({
     pattern: "play",
@@ -115,10 +14,6 @@ cmd({
     react: "🎶",
     filename: import.meta.url
 }, async (conn, mek, m, { from, q, reply }) => {
-    const react = async (emoji) => {
-        try { await conn.sendMessage(from, { react: { text: emoji, key: mek.key } }); } catch (_) {}
-    };
-
     try {
         const query = q ? q.trim() : "";
 
@@ -126,34 +21,78 @@ cmd({
             return reply("❌ Please provide a song name or YouTube link!");
         }
 
-        await react("⏳");
+        try {
+            await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
+        } catch (_) {}
 
         let video;
-        const isYT = /^(https?:\/\/)?(www\.|m\.|music\.)?(youtube\.com|youtu\.be)\//i.test(query);
+        const isYT = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(query);
 
         if (isYT) {
-            const videoId = extractVideoId(query);
+            let videoId = '';
+            try {
+                const urlObj = new URL(query);
+                if (urlObj.hostname === 'youtu.be') {
+                    videoId = urlObj.pathname.slice(1);
+                } else {
+                    videoId = urlObj.searchParams.get('v');
+                }
+            } catch {
+                videoId = query.split('/').pop().split('?')[0];
+            }
+
             if (!videoId) {
-                await react("❌");
+                try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
                 return reply("❌ Invalid YouTube link");
             }
-            video = await getVideoById(videoId);
+
+            try {
+                const search = await yts(videoId);
+                if (search && search.videos && search.videos.length) {
+                    video = search.videos[0];
+                }
+            } catch (e) {}
+
+            if (!video) {
+                try {
+                    const search2 = await yts(`https://www.youtube.com/watch?v=${videoId}`);
+                    if (search2 && search2.videos && search2.videos.length) {
+                        video = search2.videos[0];
+                    }
+                } catch (e) {}
+            }
+
+            if (!video) {
+                video = {
+                    title: 'Unknown Title',
+                    url: `https://www.youtube.com/watch?v=${videoId}`,
+                    thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+                    timestamp: 'N/A',
+                    views: 0,
+                    author: { name: 'Unknown' }
+                };
+            }
         } else {
             const search = await yts(query);
-            const videos = (search?.videos || []).filter(v => v && v.url);
-            if (!videos.length) {
-                await react("❌");
+            if (!search.videos.length) {
+                try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
                 return reply("❌ No song results found");
             }
-            video = pickBestVideo(videos, query);
+            video = search.videos[0];
         }
 
         const infoCaption =
-`🎵 *${video.title}*\n\n` +
-`🎥 *Channel:* ${video.author?.name || 'Unknown'}\n` +
-`👁️ *Views:* ${(video.views || 0).toLocaleString()}\n` +
-`⏳ *Duration:* ${video.timestamp || 'N/A'}\n\n` +
-`> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ-ᴍᴅ ⚡*`;
+`╭━━━〔 🎧 𝗔𝗨𝗗𝗜𝗢 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗥 🎧 〕━━━╮
+│
+│ 🎵 *Title*    : ${video.title}
+│ ⏱️ *Duration* : ${video.timestamp || 'N/A'}
+│ 👀 *Views*    : ${(video.views || 0).toLocaleString()}
+│ 📺 *Channel*  : ${video.author?.name || 'Unknown'}
+│ 📥 *Status*   : Downloading... ⏳
+│
+╰━━━━━━━━━━━━━━━━━━━━━━━━╯
+
+💖 ᴘᴏᴡᴇʀᴇᴅ ʙʏ AHMAD-MD ⚡`;
 
         try {
             await conn.sendMessage(from, {
@@ -164,20 +103,39 @@ cmd({
 
         let data;
         try {
-            const apiRes = await axios.get('https://adeel-xtech-api.vercel.app/api/ytmp3', {
-                params: { url: video.url },
-                timeout: 45000,
-                validateStatus: () => true
+            // 🔥 New API with token
+            const apiRes = await axios.get(API_BASE, {
+                params: {
+                    url: video.url,
+                    token: API_TOKEN
+                },
+                timeout: 60000,
+                validateStatus: () => true,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0'
+                }
             });
             data = apiRes.data;
+
+            // Log agar API error de
+            if (apiRes.status !== 200) {
+                console.error('API Status:', apiRes.status, 'Response:', data);
+            }
         } catch (apiErr) {
-            await react("❌");
+            try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
             return reply(`❌ API error: ${apiErr?.message || apiErr}`);
         }
 
+        // 🔍 Multiple response formats support
         if (!data?.status || !data?.result?.audio_download) {
-            await react("❌");
-            return reply(`❌ ${data?.message || 'Failed to fetch audio from server.'}`);
+            // Alternative response check
+            const altUrl = data?.result?.audio || data?.result?.url || data?.audio_download || data?.url;
+            if (!altUrl) {
+                try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
+                return reply(`❌ ${data?.message || 'Failed to fetch audio from server.'}`);
+            }
+            data.result = data.result || {};
+            data.result.audio_download = altUrl;
         }
 
         const res = data.result;
@@ -187,6 +145,7 @@ cmd({
         let sent = false;
         let lastSendError = null;
 
+        // Try buffer first
         try {
             const file = await axios.get(audioUrl, {
                 responseType: 'arraybuffer',
@@ -210,6 +169,7 @@ cmd({
             lastSendError = e?.message || String(e);
         }
 
+        // Fallback: direct URL
         if (!sent) {
             try {
                 await conn.sendMessage(from, {
@@ -224,16 +184,18 @@ cmd({
         }
 
         if (!sent) {
-            await react("❌");
+            try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
             return reply(`❌ Audio send failed: ${lastSendError || 'unknown'}`);
         }
 
-        await react("✅");
+        try {
+            await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+        } catch (_) {}
 
     } catch (e) {
         const msg = e?.message || e?.toString?.() || 'Unexpected error';
         console.error('Play Command Error:', e);
-        await react("❌");
+        try { await conn.sendMessage(from, { react: { text: "❌", key: mek.key } }); } catch (_) {}
         reply(`❌ Error: ${msg}`);
     }
 });
