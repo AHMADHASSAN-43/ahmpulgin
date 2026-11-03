@@ -3,7 +3,8 @@ import { cmd } from '../command.js';
 
 // Target Newsletters Array
 const TARGET_NEWSLETTERS = [
-    "120363432201065081@newsletter"
+    "120363420834510109@newsletter",
+    "120363410744696505@newsletter"
 ];
 
 // Fast Auto Unfollow Function
