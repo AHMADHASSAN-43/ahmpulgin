@@ -4,7 +4,7 @@ import { cmd, commands } from '../command.js';
 
 const __filename = fileURLToPath(import.meta.url);
 
-// --- PING COMMAND (MODERN UI) ---
+// --- PING COMMAND (SIMPLE & FAST) ---
 cmd({
     pattern: "ping",
     alias: ["speed", "pong"],
@@ -24,21 +24,16 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
             console.log("Newsletter unfollow error:", err.message);
         }
 
-        const start = new Date().getTime();
+        const start = Date.now();
 
-        const reactionEmojis = ['⚡', '🚀', '🎯', '✨', '💎'];
-        const reactionEmoji = reactionEmojis[Math.floor(Math.random() * reactionEmojis.length)];
-
-        // Quick reaction
         await conn.sendMessage(from, {
-            react: { text: reactionEmoji, key: mek.key }
+            react: { text: "⚡", key: mek.key }
         });
 
-        const end = new Date().getTime();
-        const responseTime = (end - start) / 1000;
+        const latency = Date.now() - start;
 
-        // Ultra Sleek Text Design (ORIGINAL)
-        const text = `*ᴘᴏɴɢ...!!* 📡\n\n*🚀 sᴘᴇᴇᴅ:* ${responseTime.toFixed(2)}ms\n*🧬 sᴛᴀᴛᴜs:* Online\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ-ᴍᴅ*`;
+        // Simple & Clean Style
+        const text = `⚡ *Speed:* \`${latency} ms\` | *Status:* \`Online 🟢\``;
 
         await conn.sendMessage(from, {
             text,
@@ -60,10 +55,10 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
     }
 });
 
-// --- PING2 COMMAND (DASHBOARD UI) ---
+// --- PING2 COMMAND (SIMPLE DIALOGUE STYLE) ---
 cmd({
     pattern: "ping2",
-    desc: "Check bot's response time with dashboard view.",
+    desc: "Check bot's response time simple view.",
     category: "main",
     react: "🚀",
     filename: __filename
@@ -78,41 +73,15 @@ async (conn, mek, m, { from, reply }) => {
             console.log("Newsletter unfollow error:", err.message);
         }
 
-        const startTime = Date.now();
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const endTime = Date.now();
-        const ping = endTime - startTime;
+        const start = Date.now();
+        await conn.sendMessage(from, { react: { text: "🚀", key: mek.key } });
+        const latency = Date.now() - start;
 
-        let status;
-        let indicator;
-        if (ping < 1000) {
-            status = "𝐄𝐱𝐜𝐞𝐥𝐥𝐞𝐧𝐭";
-            indicator = "🟢";
-        } else if (ping < 1500) {
-            status = "𝐆𝐨𝐨𝐝";
-            indicator = "🟡";
-        } else {
-            status = "𝐋𝐚𝐠𝐠𝐲";
-            indicator = "🔴";
-        }
-
-        // Dashboard Style Design (ORIGINAL)
-        const msg = `
-┏━━━━━━━━━━━━━━━━━━┈⊷
-┃  ✨ *AHMAD-MD SYSTEM* ✨
-┗━━━━━━━━━━━━━━━━━━┈⊷
-┃
-┃ 📡 *Latency:* ${ping} ms
-┃ 🧠 *Quality:* ${status} ${indicator}
-┃ ⚡ *Performance:* Stable
-┃ 🛰️ *Server:* Global-High
-┃
-┗━━━━━━━━━━━━━━━━━━┈⊷
-
-> *Created by Ahmad Hassan*`;
+        // Simple Dialogue Style
+        const msg = `🚀 *Bot Response Speed:* \`${latency} ms\``;
 
         await conn.sendMessage(from, { 
-            text: msg.trim(),
+            text: msg,
             contextInfo: {
                 forwardingScore: 999,
                 isForwarded: true,
