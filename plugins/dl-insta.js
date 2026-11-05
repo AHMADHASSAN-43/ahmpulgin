@@ -21,7 +21,6 @@ cmd({
 
         // Show processing reaction
         await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
-        await reply(`╭──────❀ 📥 ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ❀──────╮\n│\n│ 🌸 📸 ɪɴsᴛᴀɢʀᴀᴍ ᴍᴇᴅɪᴀ\n│ 💖 ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ᴍɪᴛʀᴏ, ᴀʙʜɪ ᴀᴀ ʀᴀʜᴀ ʜᴀɪ...\n│ ✨ ᴊᴀʀᴀ sᴀʙʀ ᴋᴀʀᴏ ᴘʏᴀʀᴇ\n│\n╰───────────────────────╯`);
 
         // Fetch from API
         const apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/igdl?url=${encodeURIComponent(url)}`;
@@ -36,8 +35,8 @@ cmd({
         for (const item of response.data.data) {
             await conn.sendMessage(from, {
                 [item.type === 'video' ? 'video' : 'image']: { url: item.url },
-                caption: `📶 *Instagram Downloader*\n\n` +
-        `- ❤‍🩹 *Quality*: HD\n\n` +
+                caption: `╭━━❀ 📸 *ɪɴsᴛᴀɢʀᴀᴍ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ* ❀━━╮\n┃\n` +
+        `┃ 💎 ǫᴜᴀʟɪᴛʏ ➜ ʜᴅ\n┃\n╰━━━━━━━━━━━━━━━━━━━━━╯\n\n💖 ᴇɴᴊᴏʏ ʏᴏᴜʀ ᴍᴇᴅɪᴀ!\n\n` +
         `> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*`
             }, { quoted: mek });
         }
@@ -87,11 +86,11 @@ cmd({
     const likes = metadata.like || 0;
     const comments = metadata.comment || 0;
 
-    await reply(`╭──────❀ 📥 ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ❀──────╮\n│\n│ 🌸 📸 ɪɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ\n│ 💖 ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ᴍɪᴛʀᴏ, ᴀʙʜɪ ᴀᴀ ʀᴀʜᴀ ʜᴀɪ...\n│ ✨ ᴊᴀʀᴀ sᴀʙʀ ᴋᴀʀᴏ ᴘʏᴀʀᴇ\n│\n╰───────────────────────╯`);
+    await reply('Downloading Instagram video...Please wait.📥');
 
     await conn.sendMessage(from, {
       video: { url: videoUrl },
-      caption: `📥 *Instagram Reel Downloader*\n👤 *Author:* ${author}\n💬 *Caption:* ${caption}\n❤️ *Likes:* ${likes} | 💭 *Comments:* ${comments}\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*`
+      caption: `╭━━❀ 📸 *ɪɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ* ❀━━╮\n┃\n┃ 👤 ᴀᴜᴛʜᴏʀ ➜ ${author}\n┃ 💬 ᴄᴀᴘᴛɪᴏɴ ➜ ${caption}\n┃ ❤️ ʟɪᴋᴇs ➜ ${likes}\n┃ 💭 ᴄᴏᴍᴍᴇɴᴛs ➜ ${comments}\n┃\n╰━━━━━━━━━━━━━━━━━━━━━╯\n\n💖 ᴇɴᴊᴏʏ ʏᴏᴜʀ ʀᴇᴇʟ, ʙᴇsᴛɪᴇ! 🌸\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*`
     }, { quoted: mek });
 
     await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
@@ -119,7 +118,6 @@ cmd({
 
         // Show processing reaction  
         await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });  
-        await reply(`╭──────❀ 📥 ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ❀──────╮\n│\n│ 🌸 📸 ɪɴsᴛᴀɢʀᴀᴍ ᴍᴇᴅɪᴀ\n│ 💖 ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ᴍɪᴛʀᴏ, ᴀʙʜɪ ᴀᴀ ʀᴀʜᴀ ʜᴀɪ...\n│ ✨ ᴊᴀʀᴀ sᴀʙʀ ᴋᴀʀᴏ ᴘʏᴀʀᴇ\n│\n╰───────────────────────╯`);
 
         // Fetch from your API  
         const apiUrl = `https://jawad-tech.vercel.app/igdl?url=${encodeURIComponent(url)}`;
@@ -139,19 +137,19 @@ cmd({
             if (isVideo) {
                 await conn.sendMessage(from, {
                     video: { url: item.url },
-                    caption: `📱 *Instagram Downloader*\n\n` +
-                        `📹 *Type*: Video\n` +
-                        `💾 *Size*: ${(item.size / 1024 / 1024).toFixed(2)} MB\n` +
-                        `🎞️ *Format*: ${item.format}\n\n` +
+                    caption: `╭━━❀ 📸 *ɪɴsᴛᴀɢʀᴀᴍ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ* ❀━━╮\n┃\n` +
+                        `┃ 📹 ᴛʏᴘᴇ ➜ ᴠɪᴅᴇᴏ\n` +
+                        `┃ 💾 sɪᴢᴇ ➜ ${(item.size / 1024 / 1024).toFixed(2)} MB\n` +
+                        `┃ 🎞️ ꜰᴏʀᴍᴀᴛ ➜ ${item.format}\n┃\n╰━━━━━━━━━━━━━━━━━━━━━╯\n\n💖 ᴇɴᴊᴏʏ ʏᴏᴜʀ ᴍᴇᴅɪᴀ!\n\n` +
                         `> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*`
                 }, { quoted: mek });
             } else {
                 await conn.sendMessage(from, {
                     image: { url: item.url },
-                    caption: `📱 *Instagram Downloader*\n\n` +
-                        `🖼️ *Type*: Image\n` +
-                        `💾 *Size*: ${(item.size / 1024).toFixed(2)} KB\n` +
-                        `🎨 *Format*: ${item.format}\n\n` +
+                    caption: `╭━━❀ 📸 *ɪɴsᴛᴀɢʀᴀᴍ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ* ❀━━╮\n┃\n` +
+                        `┃ 🖼️ ᴛʏᴘᴇ ➜ ɪᴍᴀɢᴇ\n` +
+                        `┃ 💾 sɪᴢᴇ ➜ ${(item.size / 1024).toFixed(2)} KB\n` +
+                        `┃ 🎨 ꜰᴏʀᴍᴀᴛ ➜ ${item.format}\n┃\n╰━━━━━━━━━━━━━━━━━━━━━╯\n\n💖 ᴇɴᴊᴏʏ ʏᴏᴜʀ ᴍᴇᴅɪᴀ!\n\n` +
                         `> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*`
                 }, { quoted: mek });
             }
