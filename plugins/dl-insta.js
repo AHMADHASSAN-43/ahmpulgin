@@ -21,6 +21,7 @@ cmd({
 
         // Show processing reaction
         await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
+        await reply(`╭──────❀ 📥 ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ❀──────╮\n│\n│ 🌸 📸 ɪɴsᴛᴀɢʀᴀᴍ ᴍᴇᴅɪᴀ\n│ 💖 ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ᴍɪᴛʀᴏ, ᴀʙʜɪ ᴀᴀ ʀᴀʜᴀ ʜᴀɪ...\n│ ✨ ᴊᴀʀᴀ sᴀʙʀ ᴋᴀʀᴏ ᴘʏᴀʀᴇ\n│\n╰───────────────────────╯`);
 
         // Fetch from API
         const apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/igdl?url=${encodeURIComponent(url)}`;
@@ -37,7 +38,7 @@ cmd({
                 [item.type === 'video' ? 'video' : 'image']: { url: item.url },
                 caption: `📶 *Instagram Downloader*\n\n` +
         `- ❤‍🩹 *Quality*: HD\n\n` +
-        `> *© Powered by AHMAD TechX*`
+        `> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*`
             }, { quoted: mek });
         }
 
@@ -86,11 +87,11 @@ cmd({
     const likes = metadata.like || 0;
     const comments = metadata.comment || 0;
 
-    await reply('Downloading Instagram video...Please wait.📥');
+    await reply(`╭──────❀ 📥 ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ❀──────╮\n│\n│ 🌸 📸 ɪɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ\n│ 💖 ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ᴍɪᴛʀᴏ, ᴀʙʜɪ ᴀᴀ ʀᴀʜᴀ ʜᴀɪ...\n│ ✨ ᴊᴀʀᴀ sᴀʙʀ ᴋᴀʀᴏ ᴘʏᴀʀᴇ\n│\n╰───────────────────────╯`);
 
     await conn.sendMessage(from, {
       video: { url: videoUrl },
-      caption: `📥 *Instagram Reel Downloader*\n👤 *Author:* ${author}\n💬 *Caption:* ${caption}\n❤️ *Likes:* ${likes} | 💭 *Comments:* ${comments}\n\n> Powered By AHMAD TechX 💜`
+      caption: `📥 *Instagram Reel Downloader*\n👤 *Author:* ${author}\n💬 *Caption:* ${caption}\n❤️ *Likes:* ${likes} | 💭 *Comments:* ${comments}\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*`
     }, { quoted: mek });
 
     await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
@@ -118,6 +119,7 @@ cmd({
 
         // Show processing reaction  
         await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });  
+        await reply(`╭──────❀ 📥 ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ❀──────╮\n│\n│ 🌸 📸 ɪɴsᴛᴀɢʀᴀᴍ ᴍᴇᴅɪᴀ\n│ 💖 ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ᴍɪᴛʀᴏ, ᴀʙʜɪ ᴀᴀ ʀᴀʜᴀ ʜᴀɪ...\n│ ✨ ᴊᴀʀᴀ sᴀʙʀ ᴋᴀʀᴏ ᴘʏᴀʀᴇ\n│\n╰───────────────────────╯`);
 
         // Fetch from your API  
         const apiUrl = `https://jawad-tech.vercel.app/igdl?url=${encodeURIComponent(url)}`;
@@ -141,7 +143,7 @@ cmd({
                         `📹 *Type*: Video\n` +
                         `💾 *Size*: ${(item.size / 1024 / 1024).toFixed(2)} MB\n` +
                         `🎞️ *Format*: ${item.format}\n\n` +
-                        `> *© Powered by AHMAD TechXD*`
+                        `> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*`
                 }, { quoted: mek });
             } else {
                 await conn.sendMessage(from, {
@@ -150,7 +152,7 @@ cmd({
                         `🖼️ *Type*: Image\n` +
                         `💾 *Size*: ${(item.size / 1024).toFixed(2)} KB\n` +
                         `🎨 *Format*: ${item.format}\n\n` +
-                        `> *© Powered by AHMAD TechXD*`
+                        `> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʜᴍᴀᴅ ʜᴀssᴀɴ*`
                 }, { quoted: mek });
             }
             
