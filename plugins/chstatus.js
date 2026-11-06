@@ -59,7 +59,8 @@ cmd({
         // Permission check
         if (typeof conn.newsletterCanPostStatus === "function") {
             const can = await conn.newsletterCanPostStatus(channelJid);
-            if (can === false) {
+            console.log("[chstatus] canPost:", JSON.stringify(can));
+            if (can === false || can?.canPost === false) {
                 return reply("❌ Aap is channel par status post nahi kar sakte (admin/owner nahi ho).");
             }
         }
@@ -75,16 +76,20 @@ cmd({
             content = { text: caption };
         }
 
-        await conn.sendNewsletterStatus(channelJid, content);
+        const res = await conn.sendNewsletterStatus(channelJid, content);
+        console.log("[chstatus] result:", JSON.stringify(res, null, 2));
 
         await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
         return reply(
             `✅ *Channel Status post ho gaya!*\n\n` +
             `*Channel:* ${channelName || channelJid}\n` +
+            `*JID:* ${channelJid}\n` +
+            `*Result:* ${JSON.stringify(res)?.slice(0, 300)}\n` +
             `━━━━━━━━━━━━━━━━━━\n~ *𝐀͢ͱ꧊ϻ͒͜𝛂͜𝛛🚩*`
         );
 
     } catch (error) {
+        console.error("[chstatus] error:", error);
         reply(`❌ *Error:* ${error.message}`);
     }
 });
