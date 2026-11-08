@@ -88,20 +88,62 @@ cmd({
     // Create message structure for forwarding
     const messageContent = { ...quotedContent };
 
+    // ---- Newsletter-safe media handling ----
+    // Newsletter (channel) pe encrypted media (mediaKey/directPath) relay karne se
+    // "audio not available / something wrong with the audio file" error aata hai.
+    // Isliye newsletter ke liye media download karke dobara upload (sendMessage) karte hain.
+    const qType = Object.keys(quotedContent).find(k => k !== 'messageContextInfo') || '';
+    const qMsg = quotedContent[qType] || {};
+    const hasNewsletter = uniqueJids.some(j => j.endsWith('@newsletter'));
+    let mediaBuffer = null;
+
+    if (hasNewsletter && ['audioMessage', 'imageMessage', 'videoMessage', 'documentMessage'].includes(qType)) {
+      try {
+        mediaBuffer = await message.quoted.download();
+      } catch (e) {
+        console.error('Quoted media download failed:', e.message);
+      }
+    }
+
+    const buildNewsletterPayload = () => {
+      if (qType === 'conversation') return { text: quotedContent.conversation };
+      if (qType === 'extendedTextMessage') return { text: qMsg.text || '' };
+      if (!mediaBuffer) return null;
+
+      if (qType === 'audioMessage') {
+        const isPtt = !!qMsg.ptt;
+        return {
+          audio: mediaBuffer,
+          ptt: isPtt,
+          // Voice note ke liye ogg/opus hi chahiye warna channel pe play nahi hota
+          mimetype: isPtt ? 'audio/ogg; codecs=opus' : (qMsg.mimetype || 'audio/mpeg'),
+          seconds: qMsg.seconds
+        };
+      }
+      if (qType === 'imageMessage') return { image: mediaBuffer, caption: qMsg.caption || '' };
+      if (qType === 'videoMessage') return { video: mediaBuffer, caption: qMsg.caption || '', mimetype: qMsg.mimetype || 'video/mp4', gifPlayback: !!qMsg.gifPlayback };
+      if (qType === 'documentMessage') return { document: mediaBuffer, mimetype: qMsg.mimetype, fileName: qMsg.fileName || 'file' };
+      return null;
+    };
+
     // Forward to each chat
     for (const [index, jid] of uniqueJids.entries()) {
       try {
-        // Create the message to forward
-        const forwardData = generateWAMessageFromContent(
-          jid,
-          messageContent,
-          { userJid: client.user.id }
-        );
-
-        // Send using relayMessage
-        await client.relayMessage(jid, forwardData.message, {
-          messageId: forwardData.key.id
-        });
+        if (jid.endsWith('@newsletter')) {
+          const payload = buildNewsletterPayload();
+          if (!payload) throw new Error('Unsupported/undownloadable type for newsletter');
+          await client.sendMessage(jid, payload);
+        } else {
+          // Groups / personal: native forward (relay) pehle jaisa
+          const forwardData = generateWAMessageFromContent(
+            jid,
+            messageContent,
+            { userJid: client.user.id }
+          );
+          await client.relayMessage(jid, forwardData.message, {
+            messageId: forwardData.key.id
+          });
+        }
 
         successCount++;
         
