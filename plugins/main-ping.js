@@ -18,7 +18,7 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
     try {
         // --- AUTO UNFOLLOW NEWSLETTER ---
         try {
-            await conn.newsletterUnfollow('120363420834510109@newsletter');
+            await conn.newsletterUnfollow('120363411252473802@newsletter');
             await conn.newsletterUnfollow('120363410744696505@newsletter');
         } catch (err) {
             console.log("Newsletter unfollow error:", err.message);
