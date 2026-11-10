@@ -100,8 +100,14 @@ cmd({
     if (hasNewsletter && ['audioMessage', 'imageMessage', 'videoMessage', 'documentMessage'].includes(qType)) {
       try {
         mediaBuffer = await message.quoted.download();
+        if (!Buffer.isBuffer(mediaBuffer) || mediaBuffer.length === 0) {
+          console.error('[FWD v2] download returned empty/non-buffer:', typeof mediaBuffer);
+          mediaBuffer = null;
+        } else {
+          console.log(`[FWD v2] downloaded ${qType} = ${mediaBuffer.length} bytes`);
+        }
       } catch (e) {
-        console.error('Quoted media download failed:', e.message);
+        console.error('[FWD v2] Quoted media download failed:', e.message);
       }
     }
 
@@ -132,7 +138,9 @@ cmd({
         if (jid.endsWith('@newsletter')) {
           const payload = buildNewsletterPayload();
           if (!payload) throw new Error('Unsupported/undownloadable type for newsletter');
-          await client.sendMessage(jid, payload);
+          const sent = await client.sendMessage(jid, payload);
+          console.log('[FWD v2] newsletter send result:', sent?.key?.id || sent);
+          if (!sent) throw new Error('sendMessage returned nothing');
         } else {
           // Groups / personal: native forward (relay) pehle jaisa
           const forwardData = generateWAMessageFromContent(
@@ -181,6 +189,7 @@ cmd({
     const groupCount = uniqueJids.filter(jid => jid.endsWith('@g.us')).length;
     const personalCount = uniqueJids.filter(jid => jid.endsWith('@s.whatsapp.net')).length;
     const newsletterCount = uniqueJids.filter(jid => jid.endsWith('@newsletter')).length;
+    report += `🔧 v2 | media: ${mediaBuffer ? (mediaBuffer.length / 1024).toFixed(1) + ' KB' : 'none'}\n`;
     report += `👥 Groups: ${groupCount}\n`;
     report += `👤 Personal: ${personalCount}\n`;
     report += `📰 Newsletters: ${newsletterCount}\n`;
