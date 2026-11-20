@@ -16,20 +16,20 @@ cmd({
     if (!isCreator) return reply("❌ This command is only for the *bot owner*!");
 
     try {
-        const args = text?.trim().split(" ") || [];
+        const args = text?.trim().split(/\s+/) || [];
         const isAll = args[0]?.toLowerCase() === "all";
         const caption = isAll ? args.slice(1).join(" ") : text?.trim() || "";
-        
+
         const quotedMsg = m.quoted;
         const mimeType = quotedMsg ? (quotedMsg.msg || quotedMsg).mimetype || "" : "";
 
-        if (!quotedMsg && !caption && !isAll) {
+        if (!quotedMsg && !caption) {
             return reply(
                 `📡 *GC Status Usage:*\n\n` +
                 `*Single GC:* \`.gcstatus Hello\`\n` +
                 `*All GCs:* \`.gcstatus all Hello\`\n\n` +
                 `━━━━━━━━━━━━━━━━━━\n` +
-                `~ *𝐀͢ͱ꧊ϻ͒͜𝛂͜𝛛🚩*`
+                `~ *𝐀͢ͱ꧊ϻ͒͜𝛂͜𝛛🚩*`
             );
         }
 
@@ -46,65 +46,78 @@ cmd({
             return null;
         };
 
-        await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
-
-        // ── LOOP 1: Single Group Logic ──────────────────────────────────
-        if (!isAll) {
-            const groupMetadata = await conn.groupMetadata(from);
-            const mentionedJid = (groupMetadata.participants || []).map(p => p.id);
+        // ── Build message content (shared by single + all) ──
+        const buildContent = (participants) => {
+            const mentionedJid = (participants || []).map(p => p.id);
             const contextInfo = { mentionedJid, isGroupStatus: true };
 
-            let messageContent = {};
             if (mediaBuffer) {
                 const type = getMsgType();
-                if (type === "image") messageContent = { image: mediaBuffer, caption, contextInfo };
-                else if (type === "video") messageContent = { video: mediaBuffer, caption, contextInfo };
-                else if (type === "audio") messageContent = { audio: mediaBuffer, mimetype: mimeType, ptt: mimeType.includes("ogg"), contextInfo };
-            } else {
-                messageContent = { text: caption, contextInfo };
+                if (type === "image") return { image: mediaBuffer, caption, contextInfo };
+                if (type === "video") return { video: mediaBuffer, caption, contextInfo };
+                if (type === "audio") return {
+                    audio: mediaBuffer,
+                    mimetype: mimeType,
+                    ptt: mimeType.includes("ogg"),
+                    contextInfo
+                };
             }
 
-            await conn.sendMessage(from, messageContent);
+            // linkPreview: null => link preview generate hi nahi hoga
+            // (yehi link wale status fail hone ki main wajah thi)
+            return { text: caption, contextInfo, linkPreview: null };
+        };
+
+        // ── Send helper: retry once + real errors throw ──
+        const sendStatus = async (jid, participants) => {
+            const content = buildContent(participants);
+            try {
+                return await conn.sendMessage(jid, content);
+            } catch (err) {
+                console.error(`[gcstatus] 1st try failed for ${jid}:`, err?.message);
+                await new Promise(r => setTimeout(r, 1500));
+                return await conn.sendMessage(jid, content); // retry, error aaye to upar catch hoga
+            }
+        };
+
+        await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
+
+        // ── Single Group ──
+        if (!isAll) {
+            const groupMetadata = await conn.groupMetadata(from);
+            await sendStatus(from, groupMetadata.participants);
             await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
             return reply("✅ *Status sent to this group successfully!*");
         }
 
-        // ── LOOP 2: All Groups (Broadcast) Logic ────────────────────────
-        if (isAll) {
-            const allChats = await conn.groupFetchAllParticipating();
-            const allGroups = Object.values(allChats);
-            let successCount = 0;
+        // ── All Groups (Broadcast) ──
+        const allChats = await conn.groupFetchAllParticipating();
+        const allGroups = Object.values(allChats);
+        let successCount = 0;
+        let failCount = 0;
 
-            for (const group of allGroups) {
-                try {
-                    const mentionedJid = (group.participants || []).map(p => p.id);
-                    const contextInfo = { mentionedJid, isGroupStatus: true };
-
-                    let messageContent = {};
-                    if (mediaBuffer) {
-                        const type = getMsgType();
-                        if (type === "image") messageContent = { image: mediaBuffer, caption, contextInfo };
-                        else if (type === "video") messageContent = { video: mediaBuffer, caption, contextInfo };
-                        else if (type === "audio") messageContent = { audio: mediaBuffer, mimetype: mimeType, ptt: mimeType.includes("ogg"), contextInfo };
-                    } else {
-                        messageContent = { text: caption, contextInfo };
-                    }
-
-                    await conn.sendMessage(group.id, messageContent);
-                    successCount++;
-                    
-                    // Delay to avoid spam filters
-                    await new Promise(r => setTimeout(r, 1000)); 
-                } catch (err) {
-                    console.error(`Failed for ${group.id}:`, err.message);
-                }
+        for (const group of allGroups) {
+            try {
+                await sendStatus(group.id, group.participants);
+                successCount++;
+            } catch (err) {
+                failCount++;
+                console.error(`[gcstatus] Failed for ${group.id}:`, err?.message);
             }
-
-            await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
-            return reply(`✅ *Broadcast Finished!*\n\n*Sent to:* ${successCount} groups.\n━━━━━━━━━━━━━━━━━━\n~ *𝐀͢ͱ꧊ϻ͒͜𝛂͜𝛛🚩*`);
+            // Delay to avoid spam filters
+            await new Promise(r => setTimeout(r, 1000));
         }
 
+        await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+        return reply(
+            `✅ *Broadcast Finished!*\n\n` +
+            `*Sent to:* ${successCount} groups\n` +
+            `*Failed:* ${failCount} groups\n` +
+            `━━━━━━━━━━━━━━━━━━\n~ *𝐀͢ͱ꧊ϻ͒͜𝛂͜𝛛🚩*`
+        );
+
     } catch (error) {
+        console.error("[gcstatus] Error:", error);
         reply(`❌ *Error:* ${error.message}`);
     }
 });
