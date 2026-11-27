@@ -4,9 +4,10 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 
-const API_URL = 'https://adeel-xtech-api.onrender.com/api/gptv2';
+// ===== NEW API =====
+const API_URL = 'https://api-ahmadxmd.vercel.app/gpt';
+const API_KEY = 'EXTRA';
 const TIMEOUT = 15000;
-const API_TOKEN = 'Ahmad568868990866';
 
 // ===== SAARE AI NAMES (bina prefix support ke liye) =====
 const ALL_AI = [
@@ -28,8 +29,7 @@ async function askAI(q, reply, usage) {
     if (!q) return reply(usage);
     try {
         const res = await axios.get(API_URL, {
-            params: { q },
-            headers: { 'x-api-token': API_TOKEN },
+            params: { q, key: API_KEY },
             timeout: TIMEOUT
         });
         if (res.data && res.data.status && res.data.result) {
@@ -46,9 +46,6 @@ async function askAI(q, reply, usage) {
 
 // ============================================================
 // ===== NO-PREFIX HANDLER (on: body) =====
-// Bina prefix bhi kaam karega
-// Example: "gemini what is AI?" / "gpt hello"
-// NOTE: Prefix wale messages skip honge (cmd handler lega)
 // ============================================================
 cmd({
     'on': "body"
@@ -58,7 +55,7 @@ cmd({
 
         const text = body.trim();
 
-        // Prefix wale messages skip karo (wo cmd handler handle karega)
+        // Prefix wale messages skip karo
         const usedPrefix = (config && config.PREFIX) ? config.PREFIX : '.';
         if (text.startsWith(usedPrefix) || text.startsWith('.') || 
             text.startsWith('!') || text.startsWith('#') || text.startsWith('/')) {
@@ -67,14 +64,12 @@ cmd({
 
         const lower = text.toLowerCase();
 
-        // Check karo ke message kisi AI naam se start hota hai
         for (const aiName of ALL_AI) {
             // Case 1: "gemini hello" -> AI + question
             if (lower.startsWith(aiName + " ")) {
                 const q = text.slice(aiName.length).trim();
                 if (!q) return reply(`❌ *Usage:* ${aiName} Your question`);
 
-                // Special prompts
                 if (aiName === "mathgpt") {
                     return await askAI("Solve this math problem and explain clearly: " + q, reply, `❌ *Usage:* ${aiName} Your math problem`);
                 }
@@ -88,7 +83,7 @@ cmd({
                 return await askAI(q, reply, `❌ *Usage:* ${aiName} Your question`);
             }
 
-            // Case 2: sirf AI naam -> usage message
+            // Case 2: sirf AI naam
             if (lower === aiName) {
                 return reply(`❌ *Usage:* ${aiName} Your question`);
             }
@@ -100,7 +95,6 @@ cmd({
 
 // ============================================================
 // ===== PREFIX COMMANDS =====
-// Prefix ke saath (.gemini, .gpt etc.)
 // ============================================================
 
 // ---------- COPILOT / ELITE ----------
